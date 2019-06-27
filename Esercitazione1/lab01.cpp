@@ -26,15 +26,28 @@ using namespace std;
 // distanza minima dal control point per renderlo clickabile
 #define DISTANCE_THRESHOLD 0.015 
 
+enum CURVE_EVALUATION_METHOD
+{
+	OPENGL,
+	DE_CASTELJAU,
+	SUBDIVISION
+};
+
+CURVE_EVALUATION_METHOD eval_method = SUBDIVISION;
+
 // coordinate dei control point della curva
 float controlPoints[MAX_NUM_PTS][3];
 // numero di control point presenti
 int currentControlPoints = 0;
 
 // Window size in pixels
-int WindowHeight;
-int WindowWidth;
-int overPointIndex = -1;
+int windowHeight;
+int windowWidth;
+
+/* gestione spostamento control point */
+// indice del control point sulla quale mi trovo. -1 se non sono su un control point
+int mouseOverPointIndex = -1;
+// true se sto trasciando un control point
 bool dragging = false;
 int breakCurveCounter = 0;
 
@@ -43,12 +56,13 @@ void addNewPoint(float x, float y);
 void removeFirstPoint();
 void removeLastPoint();
 void deCasteljau(float param, float* result);
-void subdivision(float threshold, float controlPoints[][3], int numberOfControls); 
+int subdivision(float threshold, float controlPoints[][3], int numberOfControls); 
 void passive(int x, int y);
 void active(int x, int y);
-float pointFromLineSquared(float px, float py, float lx1, float ly1, float lx2, float ly2);
+float pointLineDistanceSquared(float px, float py, float lx1, float ly1, float lx2, float ly2);
 void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve[][3], float rightCurve[][3]);
 
+/* Gestione interazione tramite tastiera*/
 void myKeyboardFunc (unsigned char key, int x, int y)
 {
 	switch (key) {
@@ -81,32 +95,30 @@ void removeFirstPoint() {
 
 // Left button presses place a control point.
 void myMouseFunc( int button, int state, int x, int y ) {
+	
 	if ( button==GLUT_LEFT_BUTTON && state==GLUT_DOWN ) 
 	{
 		
-		float xPos = ((float)x)/((float)(WindowWidth-1));
-		float yPos = ((float)y)/((float)(WindowHeight-1));
+		float xPos = ((float)x)/((float)(windowWidth-1));
+		float yPos = ((float)y)/((float)(windowHeight-1));
 
+		// Flip value since y position is from top row.
+		yPos = 1.0f-yPos;			
 
-		
-
-		yPos = 1.0f-yPos;			// Flip value since y position is from top row.
-
-		cout << "Press" << overPointIndex << "\n";
-		if (overPointIndex >= 0) {
+		// se sono sopra un altro punto, invece di aggiungerne un 
+		// altro, sposto quello già presente. La gestione del movimento
+		// avviene nella funzione passive.
+		if (mouseOverPointIndex >= 0)
 			dragging = true;
-		}
-		else {
+		else
 			addNewPoint(xPos, yPos);
-		}
+
 		glutPostRedisplay();
 	}
 
-
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-		cout << "Release";
+	// quando rilascio il mouse sinistra termino il trascinamento
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 		dragging = false;
-	}
 
 }
 
@@ -121,9 +133,10 @@ void removeLastPoint() {
 // Add a new point to the end of the list.  
 // Remove the first point in the list if too many points.
 void addNewPoint( float x, float y ) {
-	if ( currentControlPoints>=MAX_NUM_PTS ) {
+	
+	if ( currentControlPoints>=MAX_NUM_PTS )
 		removeFirstPoint();
-	}
+	
 	controlPoints[currentControlPoints][0] = x;
 	controlPoints[currentControlPoints][1] = y;
 	controlPoints[currentControlPoints][2] = 0;
@@ -138,68 +151,74 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLineWidth(2);
 	
-	// Draw the line segments
-	
-	if ( currentControlPoints>1 ) {
-		glColor3f(0.0f, 0.5f, 0.8f);			// Reddish/purple lines
+	if ( currentControlPoints > 1 ) {
+		glColor3f(0.0f, 0.5f, 0.8f);
 		glBegin( GL_LINE_STRIP );
-		for ( i=0; i<currentControlPoints; i++ ) {
-				glVertex2f( controlPoints[i][0], controlPoints[i][1] ); // collego due punti
+		for ( i=0; i < currentControlPoints; i++ ) {
+			// collego i punti 2 a 2 con un segmento
+			glVertex2f( controlPoints[i][0], controlPoints[i][1] );
 		}
 		glEnd();
 	}
 
-	/*
-	if (NumPts > 1) {
+	/* DISEGNO DELLA CURVA TRAMITE OPENGL*/
+	if (eval_method == OPENGL && currentControlPoints > 1){
+
 		glColor3f(0.2f, 0.5f, 0.2f);
-		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, NumPts, &PointArray[0][0]);
-		// disegno della curva di bezier
+		// direttiva ad opengl per la valutazione dei punti di controllo
+		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, currentControlPoints, &controlPoints[0][0]);
 		glBegin(GL_LINE_STRIP);
 		// valuto la curva in 100 punti e la collego con delle linee
-		
+		for (i = 0; i < 100; i++)
+			// valutazione e rendering della curva tramite opengl
+			glEvalCoord1f((GLfloat)i / 100.0);
+
+		glEnd();
+	}
+
+	/* DISEGNO DELLA CURVA TRAMITE DECASTELJAU */
+	if (eval_method == DE_CASTELJAU && currentControlPoints > 1) {
+
+		glColor3f(0.2f, 0.5f, 0.2f);
+		// direttiva ad opengl per la valutazione dei punti di controllo
+		glBegin(GL_LINE_STRIP);
+		// valuto la curva in 100 punti e la collego con delle linee
 		float deCastResult[3];
-		
 		for (i = 0; i < 100; i++) {
 
-			// valutazione e rendering della curva tramite opengl
-			//glEvalCoord1f((GLfloat)i / 100.0);
-
-			// valutazione tramite decasteljau alternativa a quella di opengl
 			deCasteljau((float)i / 100.0, deCastResult);
 			// rendering delle valutazioni
 			glVertex3f(deCastResult[0], deCastResult[1], 0.0);
 
 		}
 		glEnd();
-	}*/
-
-	glColor3f(0.2f, 0.5f, 0.2f);
-	glBegin(GL_LINE_STRIP);
-	if (currentControlPoints > 2) {
-		breakCurveCounter = 0;
-		subdivision(0.000001, controlPoints, currentControlPoints);
-		cout << "Numero di suddivisioni " << breakCurveCounter << "\n";
 	}
-	glEnd();
-	   	  
+
+	/* DISEGNO DELLA CURVA TRAMITE SUBDIVISION */
+	if (eval_method == SUBDIVISION && currentControlPoints > 2) {
+		glColor3f(0.2f, 0.5f, 0.2f);
+		glBegin(GL_LINE_STRIP);
+		int subCount = subdivision(0.000001, controlPoints, currentControlPoints);
+		glEnd();
+
+		cout << "Numero di suddivisioni " << subCount << "\n";
+	}
+
 	// Draw the interpolated points second.
-	glColor3f( 0.0f, 0.0f, 0.0f);			// Draw points in black
-	glBegin( GL_POINTS );
+	glColor3f(0.0f, 0.0f, 0.0f);
+	glBegin(GL_POINTS);
 
-	for ( i=0; i<currentControlPoints; i++ ) {
-		if (i == overPointIndex) {
+	for (i = 0; i < currentControlPoints; i++) {
+		if (i == mouseOverPointIndex)
+			// cambio colore
 			glColor3f(1.0f, 0.0f, 0.0f);
-		}
-		glVertex2f( controlPoints[i][0], controlPoints[i][1] );
-		if (i == overPointIndex) {
+		glVertex2f(controlPoints[i][0], controlPoints[i][1]);
+		if (i == mouseOverPointIndex)
+			// ripristno il nero
 			glColor3f(0.0f, 0.0f, 0.0f);
-		}
 	}
 
-
-
 	glEnd();
-
 	glFlush();
 }
 
@@ -209,58 +228,65 @@ void initRendering() {
 	// Make big points and wide lines.  (This may be commented out if desired.)
 	glPointSize(8);
 	
-
 	// The following commands should induce OpenGL to create round points and 
 	//	antialias points and lines.  (This is implementation dependent unfortunately, and
 	//  may slow down rendering considerably.)
 	//  You may comment these out if you wish.
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
-	//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);	// Make round points, not square points
-	//glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);		// Antialias the lines
+	glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);	// Make round points, not square points
+	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);		// Antialias the lines
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
-	// per la curva di bezier
-	glEnable(GL_MAP1_VERTEX_3);
+	if(eval_method == OPENGL)
+		glEnable(GL_MAP1_VERTEX_3);
 }
 
-void subdivision(float threshold, float controlPoints[][3], int numberOfControls) {
+/* disegna la curva tramite metodo di subdivision*/
+int subdivision(float threshold, float controlPoints[][3], int numberOfControls) {
 	
 	float x, y, z, distance;
 	bool noSubdivision = false;
-	breakCurveCounter++;
-	   
+	int subdivisionCount = 0;
+	
+	float lineStartX = controlPoints[0][0];
+	float lineStartY = controlPoints[0][1];
+	float lineEndX = controlPoints[numberOfControls - 1][0];
+	float lineEndY = controlPoints[numberOfControls - 1][1];
+
 	for (int i = 1; i < numberOfControls - 1 && noSubdivision == false; i++) {
 		x = controlPoints[i][0];
 		y = controlPoints[i][1];
 		z = controlPoints[i][2];
-		distance = pointFromLineSquared(x, y, controlPoints[0][0], controlPoints[0][1], controlPoints[numberOfControls - 1][0], controlPoints[numberOfControls - 1][1]);
+		distance = pointLineDistanceSquared(x, y, lineStartX, lineStartY, lineEndX, lineEndY);
+		// se la distanza è maggiore della soglia spezzo la curva in due parti e procedo ricorsivamente.
 		if (distance > threshold) {
 			noSubdivision = true;
-			// break curve
 			float leftCurve[MAX_NUM_PTS][3];
 			float rightCurve[MAX_NUM_PTS][3];
 			divideCurve(controlPoints, numberOfControls, leftCurve, rightCurve);
-			subdivision(threshold, leftCurve, numberOfControls);
-			subdivision(threshold, rightCurve, numberOfControls);
+			subdivisionCount += subdivision(threshold, leftCurve, numberOfControls) 
+								+ subdivision(threshold, rightCurve, numberOfControls) 
+								+ 2;
 		}
 	}
 
 	if (noSubdivision == false) {
-		glVertex2f(controlPoints[0][0], controlPoints[0][1]);
-		glVertex2f(controlPoints[numberOfControls - 1][0], controlPoints[numberOfControls - 1][1]);
+		glVertex2f(lineStartX, lineStartY);
+		glVertex2f(lineEndX, lineEndY);
 	}
+	return subdivisionCount;
 }
 
-float pointFromLineSquared(float px, float py, float lx1, float ly1, float lx2, float ly2){
+// distanza tra punto e retta al quadrato
+float pointLineDistanceSquared(float px, float py, float lx1, float ly1, float lx2, float ly2){
 	float m = (ly2 - ly1) / (lx2 - lx1);
 	float q = ly2 - m * lx2;
-	float squareDistance = pow(-m * px + py - q, 2) / (m * m + 1);
-	return squareDistance;
+	return pow(-m * px + py - q, 2) / (m * m + 1);
 }
 
+// spezza la curva in ingresso in due parti
 void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve[][3], float rightCurve[][3] ) {
 	float _leftCurve[MAX_NUM_PTS][3];
 	float _reverseRightCurve[MAX_NUM_PTS][3];
@@ -270,12 +296,14 @@ void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve
 	int iteration = 0;
 	int tempNPoints = currentControlPoints;
 
+	// copio tutti i punti della curva
 	for (i = 0; i < currentControlPoints; i++) {
 		tempPoints[i][0] = controlPoints[i][0];
 		tempPoints[i][1] = controlPoints[i][1];
 		tempPoints[i][2] = controlPoints[i][2];
 	}
 
+	// copio i punti esterni nelle rispettive curve
 	_leftCurve[0][0] = tempPoints[0][0];
 	_leftCurve[0][1] = tempPoints[0][1];
 	_reverseRightCurve[0][0] = tempPoints[tempNPoints - 1][0];
@@ -288,7 +316,6 @@ void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve
 		for (i = 0; i < currentControlPoints - 1; i++) {
 			tempPoints[i][0] = 0.5 * tempPoints[i][0] + 0.5 * tempPoints[i + 1][0];
 			tempPoints[i][1] = 0.5 * tempPoints[i][1] + 0.5 * tempPoints[i + 1][1];
-			//tempPoints[i][2] = (1 - param) * tempPoint[i][2] + param * tempPoint[i + 1][2]
 		}
 		tempNPoints--;
 		iteration++;
@@ -308,12 +335,12 @@ void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve
 }
 
 void deCasteljau(float param, float* result) {
-	// copio i punti
+	
 	float tempPoints[MAX_NUM_PTS][3];
 	int i = 0;
 	int j = 0;
 	int tempNPoints = currentControlPoints;
-		
+	// copio i punti
 	for (i = 0; i < currentControlPoints; i++) {
 		tempPoints[i][0] = controlPoints[i][0];
 		tempPoints[i][1] = controlPoints[i][1];
@@ -326,7 +353,6 @@ void deCasteljau(float param, float* result) {
 		for (i = 0; i < currentControlPoints - 1; i++) {
 			tempPoints[i][0] = (1 - param) * tempPoints[i][0] + param * tempPoints[i + 1][0];
 			tempPoints[i][1] = (1 - param) * tempPoints[i][1] + param * tempPoints[i + 1][1];
-			//tempPoints[i][2] = (1 - param) * tempPoint[i][2] + param * tempPoint[i + 1][2]
 		}
 		tempNPoints--;
 	}
@@ -337,33 +363,32 @@ void deCasteljau(float param, float* result) {
 
 void active(int x, int y) {
 
-
-	float xPos = ((float)x) / ((float)(WindowWidth - 1));
-	float yPos = ((float)y) / ((float)(WindowHeight - 1));
+	float xPos = ((float)x) / ((float)(windowWidth - 1));
+	float yPos = ((float)y) / ((float)(windowHeight - 1));
 
 	yPos = 1.0f - yPos;			// Flip value since y position is from top row.
 	
-	if (dragging && overPointIndex >= 0) {
-		controlPoints[overPointIndex][0] = xPos;
-		controlPoints[overPointIndex][1] = yPos;
+	if (dragging && mouseOverPointIndex >= 0) {
+		// sposto il punto 
+		controlPoints[mouseOverPointIndex][0] = xPos;
+		controlPoints[mouseOverPointIndex][1] = yPos;
 		glutPostRedisplay();
 	}
 }
 
 void passive(int x, int y) {
 	// converto le coordinate da pixel a scena
-	float xPos = ((float)x) / ((float)(WindowWidth - 1));
-	float yPos = ((float)y) / ((float)(WindowHeight - 1));
+	float xPos = ((float)x) / ((float)(windowWidth - 1));
+	float yPos = ((float)y) / ((float)(windowHeight - 1));
 
 	yPos = 1.0f - yPos;			// Flip value since y position is from top row.
 
-	overPointIndex = -1;
+	mouseOverPointIndex = -1;
 	
 	for (int i = 0; i < currentControlPoints; i++) {
 		float distance = sqrt(pow(xPos - controlPoints[i][0], 2.0) + pow(yPos - controlPoints[i][1], 2.0));
 		if (distance < DISTANCE_THRESHOLD) {
-			cout << "over" << i << "\n";
-			overPointIndex = i;
+			mouseOverPointIndex = i;
 			break;
 		}
 	}
@@ -373,8 +398,8 @@ void passive(int x, int y) {
 
 void resizeWindow(int w, int h)
 {
-	WindowHeight = (h>1) ? h : 2;
-	WindowWidth = (w>1) ? w : 2;
+	windowHeight = (h>1) ? h : 2;
+	windowWidth = (w>1) ? w : 2;
 	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -403,5 +428,5 @@ int main(int argc, char** argv)
 	glutMotionFunc(active);
 	glutMainLoop();
 
-	return 0;					// This line is never reached
+	return 0; // This line is never reached
 }
