@@ -59,8 +59,12 @@ void deCasteljau(float param, float* result);
 int subdivision(float threshold, float controlPoints[][3], int numberOfControls); 
 void passive(int x, int y);
 void active(int x, int y);
-float pointLineDistanceSquared(float px, float py, float lx1, float ly1, float lx2, float ly2);
-void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve[][3], float rightCurve[][3]);
+float pointLineDistanceSquared(float px, float py,
+											float lx1, float ly1,
+											float lx2, float ly2);
+
+void divideCurve(float controlPoints[][3], int numberOfControls,
+							float leftCurve[][3], float rightCurve[][3]);
 
 /* Gestione interazione tramite tastiera*/
 void myKeyboardFunc (unsigned char key, int x, int y)
@@ -106,7 +110,7 @@ void myMouseFunc( int button, int state, int x, int y ) {
 		yPos = 1.0f-yPos;			
 
 		// se sono sopra un altro punto, invece di aggiungerne un 
-		// altro, sposto quello già presente. La gestione del movimento
+		// altro, sposto quello inserito precedentemente. La gestione del movimento
 		// avviene nella funzione passive.
 		if (mouseOverPointIndex >= 0)
 			dragging = true;
@@ -168,28 +172,23 @@ void display(void)
 		// direttiva ad opengl per la valutazione dei punti di controllo
 		glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, currentControlPoints, &controlPoints[0][0]);
 		glBegin(GL_LINE_STRIP);
-		// valuto la curva in 100 punti e la collego con delle linee
+		// valuto la curva in 100 punti e collego i punti successivi con dei segmenti
 		for (i = 0; i < 100; i++)
 			// valutazione e rendering della curva tramite opengl
 			glEvalCoord1f((GLfloat)i / 100.0);
-
 		glEnd();
 	}
 
 	/* DISEGNO DELLA CURVA TRAMITE DECASTELJAU */
 	if (eval_method == DE_CASTELJAU && currentControlPoints > 1) {
-
-		glColor3f(0.2f, 0.5f, 0.2f);
-		// direttiva ad opengl per la valutazione dei punti di controllo
-		glBegin(GL_LINE_STRIP);
-		// valuto la curva in 100 punti e la collego con delle linee
 		float deCastResult[3];
+		glColor3f(0.2f, 0.5f, 0.2f);
+		glBegin(GL_LINE_STRIP);
+		// valuto la curva in 100 punti e collego i punti successivi con dei segmenti
 		for (i = 0; i < 100; i++) {
-
 			deCasteljau((float)i / 100.0, deCastResult);
 			// rendering delle valutazioni
 			glVertex3f(deCastResult[0], deCastResult[1], 0.0);
-
 		}
 		glEnd();
 	}
@@ -259,8 +258,11 @@ int subdivision(float threshold, float controlPoints[][3], int numberOfControls)
 		x = controlPoints[i][0];
 		y = controlPoints[i][1];
 		z = controlPoints[i][2];
-		distance = pointLineDistanceSquared(x, y, lineStartX, lineStartY, lineEndX, lineEndY);
-		// se la distanza è maggiore della soglia spezzo la curva in due parti e procedo ricorsivamente.
+		distance =
+			pointLineDistanceSquared(x, y, lineStartX, lineStartY, lineEndX, lineEndY);
+
+		// se distanza > maggiore della soglia, 
+		//spezzo la curva in due parti e procedo ricorsivamente.
 		if (distance > threshold) {
 			noSubdivision = true;
 			float leftCurve[MAX_NUM_PTS][3];
@@ -280,14 +282,16 @@ int subdivision(float threshold, float controlPoints[][3], int numberOfControls)
 }
 
 // distanza tra punto e retta al quadrato
-float pointLineDistanceSquared(float px, float py, float lx1, float ly1, float lx2, float ly2){
+float pointLineDistanceSquared(float px, float py, float lx1, float ly1,
+												float lx2, float ly2){
 	float m = (ly2 - ly1) / (lx2 - lx1);
 	float q = ly2 - m * lx2;
 	return pow(-m * px + py - q, 2) / (m * m + 1);
 }
 
 // spezza la curva in ingresso in due parti
-void divideCurve(float controlPoints[][3], int numberOfControls, float leftCurve[][3], float rightCurve[][3] ) {
+void divideCurve(float controlPoints[][3], int numberOfControls,
+							float leftCurve[][3], float rightCurve[][3] ) {
 	float _leftCurve[MAX_NUM_PTS][3];
 	float _reverseRightCurve[MAX_NUM_PTS][3];
 	float tempPoints[MAX_NUM_PTS][3];
@@ -386,7 +390,12 @@ void passive(int x, int y) {
 	mouseOverPointIndex = -1;
 	
 	for (int i = 0; i < currentControlPoints; i++) {
-		float distance = sqrt(pow(xPos - controlPoints[i][0], 2.0) + pow(yPos - controlPoints[i][1], 2.0));
+		float distance =
+			sqrt(
+				pow(xPos - controlPoints[i][0], 2.0)
+				+ pow(yPos - controlPoints[i][1], 2.0)
+			);
+
 		if (distance < DISTANCE_THRESHOLD) {
 			mouseOverPointIndex = i;
 			break;
