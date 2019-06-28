@@ -249,24 +249,21 @@ int subdivision(float threshold, float controlPoints[][3], int numberOfControls)
 	bool noSubdivision = false;
 	int subdivisionCount = 0;
 	
-	float lineStartX = controlPoints[0][0];
-	float lineStartY = controlPoints[0][1];
-	float lineEndX = controlPoints[numberOfControls - 1][0];
-	float lineEndY = controlPoints[numberOfControls - 1][1];
+	float segmentStartX = controlPoints[0][0];
+	float segmentStartY = controlPoints[0][1];
+	float segmentEndX = controlPoints[numberOfControls - 1][0];
+	float segmentEndY = controlPoints[numberOfControls - 1][1];
 
 	for (int i = 1; i < numberOfControls - 1 && noSubdivision == false; i++) {
-		x = controlPoints[i][0];
-		y = controlPoints[i][1];
-		z = controlPoints[i][2];
+		x = controlPoints[i][0]; y = controlPoints[i][1]; z = controlPoints[i][2];
 		distance =
-			pointLineDistanceSquared(x, y, lineStartX, lineStartY, lineEndX, lineEndY);
+			pointLineDistanceSquared(x, y, segmentStartX, segmentStartY, segmentEndX, segmentEndY);
 
 		// se distanza > maggiore della soglia, 
 		//spezzo la curva in due parti e procedo ricorsivamente.
 		if (distance > threshold) {
 			noSubdivision = true;
-			float leftCurve[MAX_NUM_PTS][3];
-			float rightCurve[MAX_NUM_PTS][3];
+			float leftCurve[MAX_NUM_PTS][3]; float rightCurve[MAX_NUM_PTS][3];
 			divideCurve(controlPoints, numberOfControls, leftCurve, rightCurve);
 			subdivisionCount += subdivision(threshold, leftCurve, numberOfControls) 
 								+ subdivision(threshold, rightCurve, numberOfControls) 
@@ -275,8 +272,8 @@ int subdivision(float threshold, float controlPoints[][3], int numberOfControls)
 	}
 
 	if (noSubdivision == false) {
-		glVertex2f(lineStartX, lineStartY);
-		glVertex2f(lineEndX, lineEndY);
+		glVertex2f(segmentStartX, segmentStartY);
+		glVertex2f(segmentEndX, segmentEndY);
 	}
 	return subdivisionCount;
 }
@@ -366,7 +363,6 @@ void deCasteljau(float param, float* result) {
 }
 
 void active(int x, int y) {
-
 	float xPos = ((float)x) / ((float)(windowWidth - 1));
 	float yPos = ((float)y) / ((float)(windowHeight - 1));
 
@@ -394,8 +390,7 @@ void passive(int x, int y) {
 			sqrt(
 				pow(xPos - controlPoints[i][0], 2.0)
 				+ pow(yPos - controlPoints[i][1], 2.0)
-			);
-
+				);
 		if (distance < DISTANCE_THRESHOLD) {
 			mouseOverPointIndex = i;
 			break;
