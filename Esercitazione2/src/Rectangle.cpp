@@ -1,32 +1,37 @@
 #include "../include/Rectangle.h"
 
-MyRectangle::MyRectangle(float x, float y, float z, float width, float height) 
-	: width(width), height(height), color(Colorable(1.0,1.0,1.0)), BaseObject(x, y, z)
+#include <iostream>
+
+using namespace std;
+using namespace GameObjects;
+
+Rectangle::Rectangle(vec4 position, float width, float height) 
+	: width(width), height(height), color(Colorable(1.0,1.0,1.0)), BaseObject(position)
 {
-	computeVertices(x, y, z, width, height);
+	computeVertices(position, width, height);
 }
 
-void MyRectangle::computeVertices(float x, float y, float z, float width, float height) {
+void Rectangle::computeVertices(vec4 position, float width, float height) {
 	// left - bottom
-	rectangleVertices[0] = x;
-	rectangleVertices[1] = y;
-	rectangleVertices[2] = z;
+	rectangleVertices[0] = position.x;
+	rectangleVertices[1] = position.y;
+	rectangleVertices[2] = position.z;
 	// right - bottom
-	rectangleVertices[3] = x + width;
-	rectangleVertices[4] = y;
-	rectangleVertices[5] = z;
+	rectangleVertices[3] = position.x + width;
+	rectangleVertices[4] = position.y;
+	rectangleVertices[5] = position.z;
 	// right - top
-	rectangleVertices[6] = x + width;
-	rectangleVertices[7] = y + height;
-	rectangleVertices[8] = z;
+	rectangleVertices[6] = position.x + width;
+	rectangleVertices[7] = position.y + height;
+	rectangleVertices[8] = position.z;
 	// left - top
-	rectangleVertices[9] = x;
-	rectangleVertices[10] = y + height;
-	rectangleVertices[11] = z;
+	rectangleVertices[9] = position.x;
+	rectangleVertices[10] = position.y + height;
+	rectangleVertices[11] = position.z;
 }
 
 
-void MyRectangle::init() {
+void Rectangle::init() {
 	// genero il buffer
 	glGenBuffers(1, &rectangleVboID);
 	// attivo il buffer
@@ -37,20 +42,21 @@ void MyRectangle::init() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void MyRectangle::setColor(float r, float g, float b) {
+void Rectangle::setColor(float r, float g, float b) {
 	color.setColor(r, g, b);
 }
 
-void MyRectangle::draw() {
+void Rectangle::draw() {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glColor3f(color.getRed(), color.getGreen(), color.getBlue());
-	glLineWidth(5);
 	// attivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleVboID);
-	glVertexPointer(3, GL_FLOAT, 0, (char *)NULL);
-	glDrawArrays(GL_LINE_STRIP, 0, 2);
+	glVertexPointer(3, GL_FLOAT, 0, (char*)NULL);
+	glDrawArrays(GL_QUADS, 0, 4);
 	// disattivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
-	glDisableClientState(GL_VERTEX_ARRAY);
+void Rectangle::cleanUp() {
+	glDeleteBuffers(1, &rectangleVboID);
 }

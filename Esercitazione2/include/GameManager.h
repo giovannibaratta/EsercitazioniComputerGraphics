@@ -1,29 +1,39 @@
-#include "../include/BaseObject.h"
-#include "../include/Command.h"
 #include <unordered_map>
 #include <list>
+
+#include "BaseObject.h"
+#include "Bucket.h"
+#include "SmoothTransition.h"
 
 using namespace std;
 
 #pragma once
 class GameManager
 {
-
-private:
-	int winWidth;
-	int winHeight;
-	unordered_map<string, BaseObject*> objects;
-	std::list<Command*> commandsQueue;
-	bool registerObject(BaseObject* obj);
-	void deregisterObject(BaseObject* obj);
-	void buildWorld();
-
 public:
 	GameManager(int winWidth, int winHeight);
 	~GameManager();
 
 	void displayUpdate();
 	void worldUpdate();
-	void enqueueCommand(Command* command);
+
+	enum KEY
+	{
+		LEFT,
+		RIGHT
+	};
+
+	void keyPressed(KEY key);
+
+private:
+	int winWidth;
+	int winHeight;
+	unordered_map<string, BaseObject*> objects;
+	list<SmoothTransition*> movementHandler;
+	bool registerObject(BaseObject* obj);
+	void deregisterObject(BaseObject* obj);
+
+	void buildWorld();
+	Bucket* bucket;
 };
 

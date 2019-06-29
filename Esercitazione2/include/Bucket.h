@@ -1,23 +1,33 @@
 #pragma once
-#include "Rectangle.h"
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
+#include "Movable.h"
+#include "Colorable.h"
+
 class Bucket :
-	public BaseObject
+	public Movable, public Colorable
 {
+
+private:
 	const int MAX_CAPACITY = 4;
+	int currentLevel = 0;
+	float contentHeight = 0;
+	void computeVertices(vec4 position, float width, float height);
+	void updateContentHeight();
 
 protected:
 	float width;
 	float height;
 	GLuint rectangleVboID;
-	float rectangleVertices[24];
-	Colorable color;
-	int currentLevel = 0;
-	void computeVertices(float x, float y, float z, float width, float height);
+	float rectangleVertices[12];
 
 public:
-	Bucket(float x, float y, float z, float width, float height);
+	Bucket(vec4 position, float width, float height);
+	virtual void move(vec4 position);
 	virtual void draw();
 	virtual void init();
-	void setColor(float r, float g, float b);
+	void increaseLevel();
+	void decreaseLevel();
 };
 

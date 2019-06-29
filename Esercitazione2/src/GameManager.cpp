@@ -3,7 +3,9 @@
 #include "../include/Sphere.h"
 #include "../include/Rectangle.h"
 #include "../include/Sun.h"
-#include "../include/Bucket.h"
+
+#include <glm/glm.hpp>
+#include <iostream>
 
 GameManager::GameManager(int winWidth, int winHeight)
 	: winWidth(winWidth), winHeight(winHeight)
@@ -12,23 +14,24 @@ GameManager::GameManager(int winWidth, int winHeight)
 }
 
 void GameManager::buildWorld() {
-	MyRectangle* sky = new MyRectangle(0, 0, 0, winWidth, 200);
+	
+	GameObjects::Rectangle* sky = new GameObjects::Rectangle(vec4(vec3(0.0),1.0), winWidth, 200);
 	sky->setColor(0.274, 0.905, 0.894);
 
-	MyRectangle* grass = new MyRectangle(0, 200, 0, winWidth, winHeight-200);
+	GameObjects::Rectangle* grass = new GameObjects::Rectangle(vec4(0.0, 200.0, 0.0,1.0), winWidth, winHeight-200);
 	grass->setColor(0.082, 0.415, 0.188);
 
-	Sun* sun = new Sun(50, 50, 20);
+	Sun* sun = new Sun(vec2(50, 50), 20);
 	sun->setMainColor(1.0, 1.0, 0.0);
 	sun->setRayColor(0.949, 0.737, 0.388);
 
-	Bucket* bucket = new Bucket(100, 100, 0, 40, 40);
+	bucket = new Bucket(vec4(100, 100, 0, 1.0),40, 40);
 	bucket->setColor(1.0, 0.0, 0.0);
 
 	registerObject(sky);
-	//registerObject(grass);
-	//registerObject(sun);
-	//registerObject(bucket);
+	registerObject(grass);
+	registerObject(sun);
+	registerObject(bucket);
 }
 
 GameManager::~GameManager()
@@ -41,8 +44,6 @@ void GameManager::displayUpdate() {
 }
 
 void GameManager::worldUpdate() {
-	for (auto keyValuePair : objects)
-		keyValuePair.second->worldUpdate();
 }
 
 bool GameManager::registerObject(BaseObject *obj) {
@@ -50,14 +51,21 @@ bool GameManager::registerObject(BaseObject *obj) {
 		// ID già registrato
 		return false;
 	objects[obj->getID()] = obj;
+	obj->init();
 	return true;
 }
 
 void GameManager::deregisterObject(BaseObject* obj) {
 	objects.erase(obj->getID());
+	obj->cleanUp();
 }
 
-void GameManager::enqueueCommand(Command * command)
-{
-	commandsQueue.push_back(command);
+void GameManager::keyPressed(KEY key) {
+	std::cout << "key pressed";
+	/*
+	if (key == LEFT)
+		bucket->move(-10);
+	else if (key == RIGHT)
+		bucket->move(10);
+	*/
 }

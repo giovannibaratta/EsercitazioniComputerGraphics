@@ -25,7 +25,7 @@ void updateWorld(int value) {
 
 /* Gestione della grafica */
 void updateDisplay(int value) {
-	std::cout << "Update ";
+	//cout << "Update ";
 	glClear(GL_COLOR_BUFFER_BIT);
 	clock_t startTime = clock();
 	game -> displayUpdate();
@@ -35,19 +35,17 @@ void updateDisplay(int value) {
 	int nextUpdate = (difference >= DISPLAY_UPDATE_TIME)
 								? 0
 								: DISPLAY_UPDATE_TIME - difference;
-	// TODO("Verificare il value == -1)
-	if(value != -1)
-		glutTimerFunc(nextUpdate, updateDisplay, 0);
+	glutTimerFunc(nextUpdate, updateDisplay, 0);
 }
 
 void display(void) {
-	std::cout << "Display ";
+	//cout << "Display ";
 	game->displayUpdate();
 	glutSwapBuffers();
 }
 
 void resize(int width, int height) {
-	std::cout << "Resinzing " << width << " " << height;
+	//cout << "Resinzing " << width << " " << height;
 	if(width != FIXED_WIDTH || height != FIXED_HEIGHT)
 		glutReshapeWindow(FIXED_WIDTH, FIXED_HEIGHT);
 	glViewport(0, 0, FIXED_WIDTH, FIXED_HEIGHT);
@@ -62,19 +60,33 @@ void clean(void) {
 	delete game;
 }
 
+void arrowHandler(int key, int x, int y) {
+	switch (key)
+	{
+		case GLUT_KEY_LEFT:
+			game->keyPressed(GameManager::LEFT);
+			break;
+		case GLUT_KEY_RIGHT:
+			game->keyPressed(GameManager::RIGHT);
+			break;
+	}
+}
+
+
 int main(int argc, char **argv) {
-	
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowSize(FIXED_WIDTH, FIXED_HEIGHT);
 	glutCreateWindow("Esercitazione 2");
 	glutReshapeFunc(resize);
 	glutDisplayFunc(display);
+	glutSpecialFunc(arrowHandler);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glewInit();
-	
 	game = new GameManager(FIXED_WIDTH, FIXED_HEIGHT);
+	
 	glutTimerFunc(WORLD_UPDATE_TIME, updateWorld, 0);
 	glutTimerFunc(DISPLAY_UPDATE_TIME, updateDisplay, 0);
 	glutCloseFunc(clean);

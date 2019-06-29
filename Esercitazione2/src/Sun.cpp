@@ -1,17 +1,20 @@
-#include "../include/Sun.h"
 #include <math.h>
-#include "../include/utils.h"
 #include <iostream>
 
+#include "../include/Sun.h"
+#include "../include/utils.h"
 
 
-Sun::Sun(float x, float y, float radius) : 
-	x(x), y(y), minRay(radius*0.75),
+
+
+Sun::Sun(vec2 position, float radius) : 
+	minRay(radius*0.75),
 	maxRay(radius*1.25), radius(radius),
 	lastDraw(clock()), rayColor(Colorable(1.0,1.0,1.0)),
-	increasing(true), Sphere(x,y,0,radius)
+	increasing(true), Sphere(vec4(position, 0.0f, 1.0f),radius)
 {
 }
+
 
 void Sun::draw() {
 	Sphere::draw();
@@ -20,7 +23,6 @@ void Sun::draw() {
 	lastDraw = currentDraw;
 	float step = elapsedTime * 0.5;
 
-	std::cout << "Called " << step << " total " << animation << "\n";
 	if (increasing) {
 		// sto aumentando
 		animation += step;
@@ -42,7 +44,7 @@ void Sun::draw() {
 	glLineWidth(2);
 
 	glPushMatrix();
-	glTranslatef(x, y, 0);
+	glTranslatef(this->position.x, this->position.y, 0);
 	glBegin(GL_LINES);
 	float angleStep = 2 * PI / NUMBER_OF_RAYS;
 	float angle = 0;

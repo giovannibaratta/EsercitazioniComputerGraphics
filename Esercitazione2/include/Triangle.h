@@ -11,7 +11,7 @@ GLuint triangleVboID;
 float triangleVertex[9];
 
 public:
-	Triangle(float x, float y, float z);
+	Triangle(vec4 position);
 	virtual void draw();
 	virtual void init();
 	//~Triangle();

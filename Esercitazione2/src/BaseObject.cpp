@@ -8,42 +8,31 @@
 using namespace std;
 using Random = effolkronium::random_static;
 
-BaseObject::BaseObject(float x, float y, float z)
-	: x(x), y(y), z(z)
+BaseObject::BaseObject(vec4 position)
+	: position(position)
 {
 	clock_t startTime = clock();
 	this->id = to_string(startTime) + "_" + to_string(Random::get(0, INT32_MAX));
 }
 
-void BaseObject::worldUpdate() {
-
-}
-
-void BaseObject::passiveMotion() {
-
-}
-
-void BaseObject::init() {
-
-}
-
-void BaseObject::draw() {
-}
-
 float BaseObject::getX() {
-	return this->x;
+	return this->position.x;
 }
 
 float BaseObject::getY() {
-	return this->y;
+	return this->position.y;
 }
 
 float BaseObject::getZ() {
-	return this->z;
+	return this->position.z;
 }
 
 string BaseObject::getID()
 {
 	return this ->id;
+}
+
+void BaseObject::cleanUp() {
+
 }
 

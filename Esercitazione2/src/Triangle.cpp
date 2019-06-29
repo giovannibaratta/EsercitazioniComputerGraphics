@@ -3,17 +3,17 @@
 #include <iostream>
 
 
-Triangle::Triangle(float x, float y, float z) : BaseObject(x, y, z)
+Triangle::Triangle(vec4 position) : BaseObject(position)
 {
-	triangleVertex[0] = x;
-	triangleVertex[1] = y;
-	triangleVertex[2] = z;
-	triangleVertex[3] = x+0.2;
-	triangleVertex[4] = y;
-	triangleVertex[5] = z;
-	triangleVertex[6] = x+0.1;
-	triangleVertex[7] = y+0.1;
-	triangleVertex[8] = z;
+	triangleVertex[0] = position.x;
+	triangleVertex[1] = position.y;
+	triangleVertex[2] = position.z;
+	triangleVertex[3] = position.x +0.2;
+	triangleVertex[4] = position.y;
+	triangleVertex[5] = position.z;
+	triangleVertex[6] = position.x +0.1;
+	triangleVertex[7] = position.y +0.1;
+	triangleVertex[8] = position.z;
 }
 
 

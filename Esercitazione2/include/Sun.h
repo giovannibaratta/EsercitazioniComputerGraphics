@@ -10,7 +10,6 @@ class Sun :
 	const static int NUMBER_OF_RAYS = 8;
 	const static int GAP_SUN_RAYS = 5;
 
-	float x, y;
 	float radius;
 	float animation = 0;
 	GLuint vboID;
@@ -21,7 +20,7 @@ class Sun :
 	bool increasing;
 
 public:
-	Sun(float x, float y, float radius);
+	Sun(vec2 position, float radius);
 	void draw();
 	void init();
 	void setRayColor(float r, float g, float b);

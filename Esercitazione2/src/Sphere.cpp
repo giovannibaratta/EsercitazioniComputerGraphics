@@ -2,8 +2,8 @@
 #include <math.h>
 #include "../include/utils.h"
 
-Sphere::Sphere(float x, float y, float z, float radius)
-	: radius(radius), mainColor(Colorable(1.0, 1.0, 1.0)), BaseObject(x, y, z)
+Sphere::Sphere(vec4 position, float radius)
+	: radius(radius), mainColor(Colorable(1.0, 1.0, 1.0)), BaseObject(position)
 {
 }
 
@@ -43,8 +43,6 @@ void Sphere::init() {
 	glBufferData(GL_ARRAY_BUFFER, numberOfVertex * sizeof(float), vertices, GL_STATIC_DRAW);
 	// rimuovo il binding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	delete vertices;
 }
 
 void Sphere::draw() {

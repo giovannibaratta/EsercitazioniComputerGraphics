@@ -21,9 +21,6 @@
     <None Include="lab2.pdf" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Command.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="src\GameManager.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
@@ -54,11 +51,14 @@
     <ClCompile Include="src\Triangle.cpp">
       <Filter>File di origine\objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\SmoothTransition.cpp">
+      <Filter>File di origine\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Movable.cpp">
+      <Filter>File di origine\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Command.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="include\GameManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -88,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="include\random\random.hpp">
       <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Movable.h">
+      <Filter>File di intestazione\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SmoothTransition.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

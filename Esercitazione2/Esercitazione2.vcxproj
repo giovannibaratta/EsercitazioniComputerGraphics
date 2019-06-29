@@ -123,10 +123,11 @@
     <ClCompile Include="src\BaseObject.cpp" />
     <ClCompile Include="src\Bucket.cpp" />
     <ClCompile Include="src\Colorable.cpp" />
-    <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\GameManager.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Movable.cpp" />
     <ClCompile Include="src\Rectangle.cpp" />
+    <ClCompile Include="src\SmoothTransition.cpp" />
     <ClCompile Include="src\Sphere.cpp" />
     <ClCompile Include="src\Sun.cpp" />
     <ClCompile Include="src\Triangle.cpp" />
@@ -136,10 +137,11 @@
     <ClInclude Include="include\BaseObject.h" />
     <ClInclude Include="include\Bucket.h" />
     <ClInclude Include="include\Colorable.h" />
-    <ClInclude Include="include\Command.h" />
     <ClInclude Include="include\GameManager.h" />
+    <ClInclude Include="include\Movable.h" />
     <ClInclude Include="include\random\random.hpp" />
     <ClInclude Include="include\Rectangle.h" />
+    <ClInclude Include="include\SmoothTransition.h" />
     <ClInclude Include="include\Sphere.h" />
     <ClInclude Include="include\Sun.h" />
     <ClInclude Include="include\Triangle.h" />
@@ -149,6 +151,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
     <Import Project="..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
+    <Import Project="..\packages\glm.0.9.9.500\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -156,5 +159,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
     <Error Condition="!Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
+    <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
   </Target>
 </Project>
