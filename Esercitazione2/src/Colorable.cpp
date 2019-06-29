@@ -1,4 +1,4 @@
-#include "Colorable.h"
+#include "../include/Colorable.h"
 
 Colorable::Colorable(float r, float g, float b)
 {

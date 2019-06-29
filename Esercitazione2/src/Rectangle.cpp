@@ -1,24 +1,28 @@
-#include "Rectangle.h"
+#include "../include/Rectangle.h"
 
 MyRectangle::MyRectangle(float x, float y, float z, float width, float height) 
 	: width(width), height(height), color(Colorable(1.0,1.0,1.0)), BaseObject(x, y, z)
 {
-	computeVbo(x, y, z, width, height);
+	computeVertices(x, y, z, width, height);
 }
 
-void MyRectangle::computeVbo(float x, float y, float z, float width, float height) {
-	rectangleVertex[0] = x;
-	rectangleVertex[1] = y;
-	rectangleVertex[2] = z;
-	rectangleVertex[3] = x + width;
-	rectangleVertex[4] = y;
-	rectangleVertex[5] = z;
-	rectangleVertex[6] = x + width;
-	rectangleVertex[7] = y + height;
-	rectangleVertex[8] = z;
-	rectangleVertex[9] = x;
-	rectangleVertex[10] = y + height;
-	rectangleVertex[11] = z;
+void MyRectangle::computeVertices(float x, float y, float z, float width, float height) {
+	// left - bottom
+	rectangleVertices[0] = x;
+	rectangleVertices[1] = y;
+	rectangleVertices[2] = z;
+	// right - bottom
+	rectangleVertices[3] = x + width;
+	rectangleVertices[4] = y;
+	rectangleVertices[5] = z;
+	// right - top
+	rectangleVertices[6] = x + width;
+	rectangleVertices[7] = y + height;
+	rectangleVertices[8] = z;
+	// left - top
+	rectangleVertices[9] = x;
+	rectangleVertices[10] = y + height;
+	rectangleVertices[11] = z;
 }
 
 
@@ -28,7 +32,7 @@ void MyRectangle::init() {
 	// attivo il buffer
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleVboID);
 	// carico nel buffer i dati
-	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), rectangleVertex, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 3 * 4 * sizeof(float), rectangleVertices, GL_STATIC_DRAW);
 	// rimuovo il binding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -44,7 +48,7 @@ void MyRectangle::draw() {
 	// attivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleVboID);
 	glVertexPointer(3, GL_FLOAT, 0, (char *)NULL);
-	glDrawArrays(GL_QUADS, 0, 12);
+	glDrawArrays(GL_LINE_STRIP, 0, 2);
 	// disattivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 

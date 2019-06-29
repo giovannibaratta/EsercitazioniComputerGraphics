@@ -1,6 +1,6 @@
-#include "Sun.h"
-#include "math.h"
-#include "utils.h"
+#include "../include/Sun.h"
+#include <math.h>
+#include "../include/utils.h"
 #include <iostream>
 
 

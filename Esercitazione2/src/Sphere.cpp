@@ -1,6 +1,6 @@
-#include "Sphere.h"
+#include "../include/Sphere.h"
 #include <math.h>
-#include "utils.h"
+#include "../include/utils.h"
 
 Sphere::Sphere(float x, float y, float z, float radius)
 	: radius(radius), mainColor(Colorable(1.0, 1.0, 1.0)), BaseObject(x, y, z)

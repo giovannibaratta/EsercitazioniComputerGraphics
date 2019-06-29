@@ -76,6 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,33 +120,30 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BaseObject.cpp" />
-    <ClCompile Include="Bucket.cpp" />
-    <ClCompile Include="Colorable.cpp" />
-    <ClCompile Include="Command.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameLogic.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Rectangle.cpp" />
-    <ClCompile Include="Sphere.cpp" />
-    <ClCompile Include="Sun.cpp" />
-    <ClCompile Include="TestGameLogic.cpp" />
-    <ClCompile Include="Triangle.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="src\BaseObject.cpp" />
+    <ClCompile Include="src\Bucket.cpp" />
+    <ClCompile Include="src\Colorable.cpp" />
+    <ClCompile Include="src\Command.cpp" />
+    <ClCompile Include="src\GameManager.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Rectangle.cpp" />
+    <ClCompile Include="src\Sphere.cpp" />
+    <ClCompile Include="src\Sun.cpp" />
+    <ClCompile Include="src\Triangle.cpp" />
+    <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseObject.h" />
-    <ClInclude Include="Bucket.h" />
-    <ClInclude Include="Colorable.h" />
-    <ClInclude Include="Command.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameLogic.h" />
-    <ClInclude Include="Rectangle.h" />
-    <ClInclude Include="Sphere.h" />
-    <ClInclude Include="Sun.h" />
-    <ClInclude Include="TestGameLogic.h" />
-    <ClInclude Include="Triangle.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="include\BaseObject.h" />
+    <ClInclude Include="include\Bucket.h" />
+    <ClInclude Include="include\Colorable.h" />
+    <ClInclude Include="include\Command.h" />
+    <ClInclude Include="include\GameManager.h" />
+    <ClInclude Include="include\random\random.hpp" />
+    <ClInclude Include="include\Rectangle.h" />
+    <ClInclude Include="include\Sphere.h" />
+    <ClInclude Include="include\Sun.h" />
+    <ClInclude Include="include\Triangle.h" />
+    <ClInclude Include="include\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -9,10 +9,10 @@ protected:
 	float width;
 	float height;
 	GLuint rectangleVboID;
-	float rectangleVertex[24];
+	float rectangleVertices[24];
 	Colorable color;
 	int currentLevel = 0;
-	void computeVbo(float x, float y, float z, float width, float height);
+	void computeVertices(float x, float y, float z, float width, float height);
 
 public:
 	Bucket(float x, float y, float z, float width, float height);

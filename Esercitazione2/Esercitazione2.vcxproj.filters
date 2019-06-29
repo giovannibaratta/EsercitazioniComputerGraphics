@@ -9,21 +9,11 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="File di risorse">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="File di intestazione\objects">
+      <UniqueIdentifier>{16d28ac7-505d-494f-b9db-954fca58a874}</UniqueIdentifier>
     </Filter>
-    <Filter Include="File di intestazione\Objects">
-      <UniqueIdentifier>{1b652540-e2bb-4ec6-b324-d3b8f130d63c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="File di origine\Objects">
-      <UniqueIdentifier>{757b3e03-f151-4d85-94b9-0510f9edc2ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="File di intestazione\Objects\Properties">
-      <UniqueIdentifier>{86527672-c75b-4b4f-b4c6-d31c39b44409}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="File di origine\Objects\Properties">
-      <UniqueIdentifier>{2667e4ca-3575-470f-aa1f-09acd3203588}</UniqueIdentifier>
+    <Filter Include="File di origine\objects">
+      <UniqueIdentifier>{183efb69-11d8-41ce-a4d0-300f1d03ed22}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -31,81 +21,72 @@
     <None Include="lab2.pdf" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="src\Command.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="src\GameManager.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="Command.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="GameLogic.cpp">
+    <ClCompile Include="src\utils.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="TestGameLogic.cpp">
-      <Filter>File di origine</Filter>
+    <ClCompile Include="src\BaseObject.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
-    <ClCompile Include="Triangle.cpp">
-      <Filter>File di origine\Objects</Filter>
+    <ClCompile Include="src\Bucket.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
-    <ClCompile Include="Rectangle.cpp">
-      <Filter>File di origine\Objects</Filter>
+    <ClCompile Include="src\Colorable.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
-    <ClCompile Include="BaseObject.cpp">
-      <Filter>File di origine\Objects</Filter>
+    <ClCompile Include="src\Rectangle.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
-    <ClCompile Include="Sphere.cpp">
-      <Filter>File di origine</Filter>
+    <ClCompile Include="src\Sphere.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
-    <ClCompile Include="utils.cpp">
-      <Filter>File di origine</Filter>
+    <ClCompile Include="src\Sun.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
-    <ClCompile Include="Sun.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Colorable.cpp">
-      <Filter>File di origine\Objects\Properties</Filter>
-    </ClCompile>
-    <ClCompile Include="Bucket.cpp">
-      <Filter>File di origine</Filter>
+    <ClCompile Include="src\Triangle.cpp">
+      <Filter>File di origine\objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="include\Command.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Command.h">
+    <ClInclude Include="include\GameManager.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="GameLogic.h">
+    <ClInclude Include="include\utils.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="TestGameLogic.h">
-      <Filter>File di intestazione</Filter>
+    <ClInclude Include="include\BaseObject.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="BaseObject.h">
-      <Filter>File di intestazione\Objects</Filter>
+    <ClInclude Include="include\Bucket.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="Triangle.h">
-      <Filter>File di intestazione\Objects</Filter>
+    <ClInclude Include="include\Colorable.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="Rectangle.h">
-      <Filter>File di intestazione\Objects</Filter>
+    <ClInclude Include="include\Rectangle.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="Sphere.h">
-      <Filter>File di intestazione</Filter>
+    <ClInclude Include="include\Sphere.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>File di intestazione</Filter>
+    <ClInclude Include="include\Sun.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="Sun.h">
-      <Filter>File di intestazione</Filter>
+    <ClInclude Include="include\Triangle.h">
+      <Filter>File di intestazione\objects</Filter>
     </ClInclude>
-    <ClInclude Include="Colorable.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Bucket.h">
+    <ClInclude Include="include\random\random.hpp">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
