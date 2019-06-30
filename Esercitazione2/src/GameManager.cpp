@@ -25,13 +25,16 @@ void GameManager::buildWorld() {
 	sun->setMainColor(1.0, 1.0, 0.0);
 	sun->setRayColor(0.949, 0.737, 0.388);
 
-	bucket = new Bucket(vec4(100, 100, 0, 1.0),40, 40);
+	bucket = new Bucket(vec4(100, 100, 0, 1.0), bucketWidth, 40);
 	bucket->setColor(1.0, 0.0, 0.0);
 
 	registerObject(sky);
 	registerObject(grass);
 	registerObject(sun);
 	registerObject(bucket);
+
+	bucketHandler = new SmoothTransition(bucket);
+	movementHandler.push_back(bucketHandler);
 }
 
 GameManager::~GameManager()
@@ -44,6 +47,8 @@ void GameManager::displayUpdate() {
 }
 
 void GameManager::worldUpdate() {
+	for (auto transition : movementHandler)
+		transition->worldUptadeEvent();
 }
 
 bool GameManager::registerObject(BaseObject *obj) {
@@ -61,11 +66,18 @@ void GameManager::deregisterObject(BaseObject* obj) {
 }
 
 void GameManager::keyPressed(KEY key) {
-	std::cout << "key pressed";
-	/*
-	if (key == LEFT)
-		bucket->move(-10);
-	else if (key == RIGHT)
-		bucket->move(10);
-	*/
+	std::cout << "Key pressed " << key << "\n";
+	if (key == LEFT) {
+		vec4 newPosition = bucket->getPosition() + vec4(-stepSize, 0.0, 0.0, 0.0);
+		if (newPosition.x < 0)
+			newPosition.x = 0;
+		bucketHandler->setTargetPosition(newPosition, stepTime);
+	}
+	else if (key == RIGHT) {
+		vec4 newPosition = bucket->getPosition() + vec4(+stepSize, 0.0, 0.0, 0.0);
+		if (newPosition.x > winWidth - bucketWidth)
+			newPosition.x = winWidth - bucketWidth;
+		bucketHandler->setTargetPosition(newPosition, stepTime);
+	}
+
 }

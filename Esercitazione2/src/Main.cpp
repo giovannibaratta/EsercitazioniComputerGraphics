@@ -16,7 +16,7 @@ void updateWorld(int value) {
 	clock_t startTime = clock();
 	game -> worldUpdate();
 	clock_t endTime = clock();
-	double difference = ((float)endTime - startTime) / (CLOCKS_PER_SEC * 1000);
+	double difference = ((float)endTime - startTime) / (CLOCKS_PER_SEC / 1000);
 	int nextUpdate = (difference >= WORLD_UPDATE_TIME)
 								? 0
 								: WORLD_UPDATE_TIME - difference;
@@ -25,13 +25,12 @@ void updateWorld(int value) {
 
 /* Gestione della grafica */
 void updateDisplay(int value) {
-	//cout << "Update ";
 	glClear(GL_COLOR_BUFFER_BIT);
 	clock_t startTime = clock();
 	game -> displayUpdate();
 	glutSwapBuffers();
 	clock_t endTime = clock();
-	double difference = ((float)endTime - startTime) / (CLOCKS_PER_SEC * 1000);
+	double difference = ((float)endTime - startTime) / (CLOCKS_PER_SEC / 1000);
 	int nextUpdate = (difference >= DISPLAY_UPDATE_TIME)
 								? 0
 								: DISPLAY_UPDATE_TIME - difference;

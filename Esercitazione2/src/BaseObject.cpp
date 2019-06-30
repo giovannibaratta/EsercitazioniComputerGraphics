@@ -27,6 +27,11 @@ float BaseObject::getZ() {
 	return this->position.z;
 }
 
+vec4 BaseObject::getPosition()
+{
+	return vec4(position);
+}
+
 string BaseObject::getID()
 {
 	return this ->id;

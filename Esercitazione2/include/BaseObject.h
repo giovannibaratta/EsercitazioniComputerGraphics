@@ -19,6 +19,7 @@ public:
 	float getX();
 	float getY();
 	float getZ();
+	vec4 getPosition();
 	string getID();
 	virtual void draw() = 0;
 	virtual void init() = 0;

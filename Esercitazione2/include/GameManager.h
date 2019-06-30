@@ -28,6 +28,8 @@ public:
 private:
 	int winWidth;
 	int winHeight;
+	float stepSize = 50.0;
+	int stepTime = 100;
 	unordered_map<string, BaseObject*> objects;
 	list<SmoothTransition*> movementHandler;
 	bool registerObject(BaseObject* obj);
@@ -35,5 +37,7 @@ private:
 
 	void buildWorld();
 	Bucket* bucket;
+	int bucketWidth = 40;
+	SmoothTransition* bucketHandler;
 };
 
