@@ -6,28 +6,28 @@ using namespace std;
 using namespace GameObjects;
 
 Rectangle::Rectangle(vec4 position, float width, float height) 
-	: width(width), height(height), color(Colorable(1.0,1.0,1.0)), BaseObject(position)
+	: width(width), height(height), Colorable(1.0,1.0,1.0), BaseObject(position)
 {
 	computeVertices(position, width, height);
 }
 
 void Rectangle::computeVertices(vec4 position, float width, float height) {
 	// left - bottom
-	rectangleVertices[0] = position.x;
-	rectangleVertices[1] = position.y;
-	rectangleVertices[2] = position.z;
+	rectangleVertices[0] = 0;
+	rectangleVertices[1] = 0;
+	rectangleVertices[2] = 0;
 	// right - bottom
-	rectangleVertices[3] = position.x + width;
-	rectangleVertices[4] = position.y;
-	rectangleVertices[5] = position.z;
+	rectangleVertices[3] = width;
+	rectangleVertices[4] = 0;
+	rectangleVertices[5] = 0;
 	// right - top
-	rectangleVertices[6] = position.x + width;
-	rectangleVertices[7] = position.y + height;
-	rectangleVertices[8] = position.z;
+	rectangleVertices[6] = width;
+	rectangleVertices[7] = height;
+	rectangleVertices[8] = 0;
 	// left - top
-	rectangleVertices[9] = position.x;
-	rectangleVertices[10] = position.y + height;
-	rectangleVertices[11] = position.z;
+	rectangleVertices[9] = 0;
+	rectangleVertices[10] = height;
+	rectangleVertices[11] = 0;
 }
 
 
@@ -40,21 +40,23 @@ void Rectangle::init() {
 	glBufferData(GL_ARRAY_BUFFER, 3 * 4 * sizeof(float), rectangleVertices, GL_STATIC_DRAW);
 	// rimuovo il binding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
 
-void Rectangle::setColor(float r, float g, float b) {
-	color.setColor(r, g, b);
+	cout << "Rec ID" << rectangleVboID << "\n";
 }
 
 void Rectangle::draw() {
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
 	glEnableClientState(GL_VERTEX_ARRAY);
-	glColor3f(color.getRed(), color.getGreen(), color.getBlue());
+	glColor3f(color[0], color[1], color[2]);
+	glTranslatef(position.x, position.y, position.z);
 	// attivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, rectangleVboID);
 	glVertexPointer(3, GL_FLOAT, 0, (char*)NULL);
 	glDrawArrays(GL_QUADS, 0, 4);
 	// disattivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glPopMatrix();
 }
 
 void Rectangle::cleanUp() {

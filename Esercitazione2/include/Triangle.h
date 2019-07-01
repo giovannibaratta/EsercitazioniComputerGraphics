@@ -1,19 +1,18 @@
 #pragma once
-#include "BaseObject.h"
-#include <GL/glew.h>
-#include <GL/freeglut.h>
 
-class Triangle :
-	public BaseObject
+#include "BaseObject.h"
+#include "Colorable.h"
+
+class Triangle : public BaseObject, public Colorable
 {
 
-GLuint triangleVboID;
-float triangleVertex[9];
+private:
+	float size;
+	float triangleVertex[9];
 
 public:
-	Triangle(vec4 position);
+	Triangle(vec4 position, float size);
 	virtual void draw();
 	virtual void init();
-	//~Triangle();
 };
 

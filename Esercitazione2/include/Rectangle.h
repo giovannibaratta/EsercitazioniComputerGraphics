@@ -4,24 +4,22 @@
 #pragma once
 
 namespace GameObjects {
-	class Rectangle :
-		public BaseObject
+	class Rectangle : public BaseObject, public Colorable
 	{
+
 	protected:
 		float width;
 		float height;
 		GLuint rectangleVboID;
 		float rectangleVertices[12];
-		Colorable color;
 		void computeVertices(vec4 position, float width, float height);
 
-
+		
 	public:
-		Rectangle(vec4 position, float width, float height);
+		Rectangle(vec4 position, float width, float height );
 		virtual void draw();
 		virtual void init();
-		void setColor(float r, float g, float b);
-		void cleanUp();
+		virtual void cleanUp();
 	};
 }
 

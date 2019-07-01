@@ -26,6 +26,8 @@ public:
 	void keyPressed(KEY key);
 
 private:
+	const float FAR_Z = 0.1;
+	const float NEAR_Z = 0.9;
 	int winWidth;
 	int winHeight;
 	float stepSize = 50.0;
@@ -36,8 +38,11 @@ private:
 	void deregisterObject(BaseObject* obj);
 
 	void buildWorld();
+
+	// bucket
 	Bucket* bucket;
 	int bucketWidth = 40;
+	int bucketMaxCapacity = 4;
 	SmoothTransition* bucketHandler;
 };
 

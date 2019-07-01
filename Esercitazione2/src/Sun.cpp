@@ -2,25 +2,25 @@
 #include <iostream>
 
 #include "../include/Sun.h"
-#include "../include/utils.h"
 
-
-
-
-Sun::Sun(vec2 position, float radius) : 
+Sun::Sun(vec4 position, float radius) : 
 	minRay(radius*0.75),
 	maxRay(radius*1.25), radius(radius),
 	lastDraw(clock()), rayColor(Colorable(1.0,1.0,1.0)),
-	increasing(true), Sphere(vec4(position, 0.0f, 1.0f),radius)
+	increasing(true), Sphere(position,radius)
 {
 }
 
-
 void Sun::draw() {
-	Sphere::draw();
 	clock_t currentDraw = clock();
-	float elapsedTime = ((double)currentDraw - lastDraw) / CLOCKS_PER_SEC;
+
+	// disegno la sfera interna
+	Sphere::draw();
+
+	// tempo trascorso in ms
+	float elapsedTime = ((double)currentDraw - lastDraw) / (CLOCKS_PER_SEC / 1000);
 	lastDraw = currentDraw;
+
 	float step = elapsedTime * 0.5;
 
 	if (increasing) {
@@ -40,13 +40,12 @@ void Sun::draw() {
 		}
 	}
 
-	glColor3f(rayColor.getRed(), rayColor.getGreen(), rayColor.getBlue());
-	glLineWidth(2);
-
 	glPushMatrix();
-	glTranslatef(this->position.x, this->position.y, 0);
+	glLineWidth(2);
+	glMatrixMode(GL_MODELVIEW);
+	glTranslatef(position.x, position.y, position.z);
 	glBegin(GL_LINES);
-	float angleStep = 2 * PI / NUMBER_OF_RAYS;
+	
 	float angle = 0;
 	for (int i = 0; i < NUMBER_OF_RAYS; i++) {
 		
@@ -55,7 +54,7 @@ void Sun::draw() {
 			? minRay * animation + (1 - animation) * maxRay
 			: minRay * (1 - animation) + animation * maxRay;
 		glVertex2f((radius + GAP_SUN_RAYS + segmentLength) * cos(angle), (radius + GAP_SUN_RAYS + segmentLength)* sin(angle));
-		angle += angleStep;
+		angle += ANGLE_STEP;
 	}
 	glEnd();
 	glPopMatrix();

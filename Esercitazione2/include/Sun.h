@@ -1,26 +1,36 @@
 #pragma once
-#include "Sphere.h"
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <time.h>
 
-class Sun :
-	public Sphere
-{
-	const static int NUMBER_OF_RAYS = 8;
-	const static int GAP_SUN_RAYS = 5;
+#include "Sphere.h"
+#include "utils.h"
 
-	float radius;
+class Sun :	public Sphere
+{
+
+private:
+	const static int NUMBER_OF_RAYS = 8;
+	const float ANGLE_STEP = 2 * PI / NUMBER_OF_RAYS;
+	const static int GAP_SUN_RAYS = 5;
+	// durata animazione in ms
+	const static int ANIMATION_DURATION = 2000;
 	float animation = 0;
-	GLuint vboID;
-	Colorable rayColor;
-	float minRay;
-	float maxRay;
-	clock_t lastDraw;
+	// stato animazione, true espando il raggio, falso lo riduco
 	bool increasing;
 
+	float radius;
+	// colore del raggio del sole
+	Colorable rayColor;
+	// lunghezza minima raggio del sole
+	float minRay;
+	// lunghezza massima raggio del sole
+	float maxRay;
+	// clock dell'ultimo disegno
+	clock_t lastDraw;
+
 public:
-	Sun(vec2 position, float radius);
+	Sun(vec4 position, float radius);
 	void draw();
 	void init();
 	void setRayColor(float r, float g, float b);

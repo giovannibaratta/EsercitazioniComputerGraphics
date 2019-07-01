@@ -5,12 +5,11 @@
 #include "Movable.h"
 #include "Colorable.h"
 
-class Bucket :
-	public Movable, public Colorable
+class Bucket : public Movable, public Colorable
 {
 
 private:
-	const int MAX_CAPACITY = 4;
+	int maxCapacity;
 	int currentLevel = 0;
 	float contentHeight = 0;
 	void computeVertices(vec4 position, float width, float height);
@@ -19,14 +18,14 @@ private:
 protected:
 	float width;
 	float height;
-	GLuint rectangleVboID;
-	float rectangleVertices[12];
+	GLuint outerVboID;
+	float outerVertices[12];
 
 public:
-	Bucket(vec4 position, float width, float height);
-	virtual void move(vec4 position);
+	Bucket(vec4 position, float width, float height, int maxCapacity);
 	virtual void draw();
 	virtual void init();
+	virtual void cleanUp();
 	void increaseLevel();
 	void decreaseLevel();
 };
