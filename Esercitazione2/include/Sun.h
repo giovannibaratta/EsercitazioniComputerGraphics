@@ -12,7 +12,7 @@ class Sun :	public Sphere
 private:
 	const static int NUMBER_OF_RAYS = 8;
 	const float ANGLE_STEP = 2 * PI / NUMBER_OF_RAYS;
-	const static int GAP_SUN_RAYS = 5;
+	const static int GAP_SUN_RAYS = 1;
 	// durata animazione in ms
 	const static int ANIMATION_DURATION = 2000;
 	float animation = 0;
@@ -26,8 +26,9 @@ private:
 	float minRay;
 	// lunghezza massima raggio del sole
 	float maxRay;
-	// clock dell'ultimo disegno
-	clock_t lastDraw;
+
+	// size tra 0 e 1
+	void drawRays(float size);
 
 public:
 	Sun(vec4 position, float radius);

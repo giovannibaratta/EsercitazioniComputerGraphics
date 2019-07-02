@@ -3,10 +3,10 @@
 #include <GL/freeglut.h>
 
 #include "Colorable.h"
-#include "BaseObject.h"
 #include "utils.h"
+#include "Movable.h"
 
-class Sphere : public BaseObject, public Colorable
+class Sphere : public Colorable, public Movable
 	{
 	private:
 		static const int NUMBER_OF_PIECES = 45;

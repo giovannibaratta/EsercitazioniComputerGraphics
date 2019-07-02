@@ -3,11 +3,11 @@
 
 #include "../include/Sun.h"
 
-Sun::Sun(vec4 position, float radius) : 
-	minRay(radius*0.75),
-	maxRay(radius*1.25), radius(radius),
-	lastDraw(clock()), rayColor(Colorable(1.0,1.0,1.0)),
-	increasing(true), Sphere(position,radius)
+Sun::Sun(vec4 position, float radius) :
+	minRay(radius * 0.8),
+	maxRay(radius * 1.2), radius(radius),
+	rayColor(Colorable(1.0, 1.0, 1.0)),
+	increasing(true), Sphere(position, radius)
 {
 }
 
@@ -17,45 +17,46 @@ void Sun::draw() {
 	// disegno la sfera interna
 	Sphere::draw();
 
-	// tempo trascorso in ms
-	float elapsedTime = ((double)currentDraw - lastDraw) / (CLOCKS_PER_SEC / 1000);
-	lastDraw = currentDraw;
+	// current time in ms (int value)
+	int currentMs
+		= static_cast<int>(round(static_cast<double>(currentDraw) / (CLOCKS_PER_SEC / 1000)));
+	float animationPercentage =
+		(currentMs % ANIMATION_DURATION) / static_cast<float>(ANIMATION_DURATION);
+	bool animationPhase = (currentMs / ANIMATION_DURATION) % 2 == 0;
 
-	float step = elapsedTime * 0.5;
+	drawRays(
+		animationPhase == 0 ? animationPercentage : 1 - animationPercentage
+	);
+}
 
-	if (increasing) {
-		// sto aumentando
-		animation += step;
-		if (animation > 1.0) {
-			animation = 1.0;
-			increasing = false;
-		}
-	}
-	else {
-		// sto tornando indietro
-		animation -= step;
-		if (animation < 0.0) {
-			animation = 0.0;
-			increasing = true;
-		}
-	}
-
+void Sun::drawRays(float size) {
 	glPushMatrix();
 	glLineWidth(2);
 	glMatrixMode(GL_MODELVIEW);
-	glTranslatef(position.x, position.y, position.z);
+	glColor3f(rayColor.getRedColor(), rayColor.getGreenColor(), rayColor.getBlueColor());
+	glTranslatef(position.x, position.y, position.z + 0.05);
 	glBegin(GL_LINES);
+
 	
+	float evenHalfSegment = (minRay * size + (1 - size) * maxRay) / 2;
+	float oddHalfSegment = (minRay * (1 - size) + size * maxRay) / 2;
+
 	float angle = 0;
-	for (int i = 0; i < NUMBER_OF_RAYS; i++) {
+	float offset = radius + GAP_SUN_RAYS + maxRay/2;
+	for( int i = 0; i < NUMBER_OF_RAYS; i += 2){
 		
-		glVertex2f((radius + GAP_SUN_RAYS) * cos(angle) , (radius + GAP_SUN_RAYS)* sin(angle));
-		float segmentLength = i % 2 == 0 
-			? minRay * animation + (1 - animation) * maxRay
-			: minRay * (1 - animation) + animation * maxRay;
-		glVertex2f((radius + GAP_SUN_RAYS + segmentLength) * cos(angle), (radius + GAP_SUN_RAYS + segmentLength)* sin(angle));
-		angle += ANGLE_STEP;
+		glVertex2f((offset - evenHalfSegment) * cos(angle), (offset - evenHalfSegment) * sin(angle));
+		glVertex2f((offset + evenHalfSegment) * cos(angle), (offset + evenHalfSegment) * sin(angle));
+		angle += ANGLE_STEP * 2;
 	}
+
+	angle = ANGLE_STEP;
+	for (int i = 1; i < NUMBER_OF_RAYS; i += 2) {
+		glVertex2f((offset - oddHalfSegment) * cos(angle), (offset - oddHalfSegment) * sin(angle));
+		glVertex2f((offset + oddHalfSegment) * cos(angle), (offset + oddHalfSegment) * sin(angle));
+		angle += ANGLE_STEP * 2;
+	}
+
 	glEnd();
 	glPopMatrix();
 }

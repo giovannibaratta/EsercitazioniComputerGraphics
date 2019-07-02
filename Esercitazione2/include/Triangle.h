@@ -1,9 +1,9 @@
 #pragma once
 
-#include "BaseObject.h"
 #include "Colorable.h"
+#include "Movable.h"
 
-class Triangle : public BaseObject, public Colorable
+class Triangle : public Colorable, public Movable
 {
 
 private:

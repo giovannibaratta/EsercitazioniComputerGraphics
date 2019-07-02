@@ -6,7 +6,7 @@
 
 
 Triangle::Triangle(vec4 position, float size) :
-	size(size), Colorable(1.0,1.0,1.0), BaseObject(position)
+	size(size), Colorable(1.0,1.0,1.0), Movable(position)
 {
 }
 

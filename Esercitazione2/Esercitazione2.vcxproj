@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BaseObject.cpp" />
+    <ClCompile Include="src\BoundingBox.cpp" />
     <ClCompile Include="src\Bucket.cpp" />
     <ClCompile Include="src\Colorable.cpp" />
     <ClCompile Include="src\GameManager.cpp" />
@@ -132,9 +133,11 @@
     <ClCompile Include="src\Sun.cpp" />
     <ClCompile Include="src\Triangle.cpp" />
     <ClCompile Include="src\utils.cpp" />
+    <ClCompile Include="src\Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BaseObject.h" />
+    <ClInclude Include="include\BoundingBox.h" />
     <ClInclude Include="include\Bucket.h" />
     <ClInclude Include="include\Colorable.h" />
     <ClInclude Include="include\GameManager.h" />
@@ -146,6 +149,7 @@
     <ClInclude Include="include\Sun.h" />
     <ClInclude Include="include\Triangle.h" />
     <ClInclude Include="include\utils.h" />
+    <ClInclude Include="include\Water.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

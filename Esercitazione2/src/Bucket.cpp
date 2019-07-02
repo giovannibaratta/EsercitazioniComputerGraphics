@@ -3,10 +3,10 @@
 
 #include "../include/Bucket.h"
 
-
 Bucket::Bucket(vec4 position, float width, float height, int maxCapacity)
 	: width(width), height(height), maxCapacity(maxCapacity),
-		Movable(position), Colorable(0.0,0.0,0.0)
+		Movable(position), Colorable(0.0,0.0,0.0),
+	BoundingBox(position + vec4(0.0, height / 9 * 10, 0.0, 0.0), width, height / 10, false)
 {
 	computeVertices(position, width, height);
 }
@@ -56,6 +56,13 @@ void Bucket::init() {
 	// rimuovo il binding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+
+void Bucket::move(vec4 position)
+{
+	Movable::move(position);
+	updateBoundingBox(position + vec4(0.0, height / 9 * 10, 0.0, 0.0), width, height / 10);
+}
+
 
 void Bucket::draw() {
 	// recipiente

@@ -1,9 +1,11 @@
 #include <unordered_map>
 #include <list>
+#include <vector>
 
 #include "BaseObject.h"
 #include "Bucket.h"
 #include "SmoothTransition.h"
+#include "../include/Rectangle.h"
 
 using namespace std;
 
@@ -34,6 +36,7 @@ private:
 	int stepTime = 100;
 	unordered_map<string, BaseObject*> objects;
 	list<SmoothTransition*> movementHandler;
+	vector<BaseObject*> objectWithBB;
 	bool registerObject(BaseObject* obj);
 	void deregisterObject(BaseObject* obj);
 
@@ -44,5 +47,7 @@ private:
 	int bucketWidth = 40;
 	int bucketMaxCapacity = 4;
 	SmoothTransition* bucketHandler;
+
+	GameObjects::Rectangle* screenEnd;
 };
 

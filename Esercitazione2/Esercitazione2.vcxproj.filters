@@ -57,6 +57,12 @@
     <ClCompile Include="src\Movable.cpp">
       <Filter>File di origine\objects</Filter>
     </ClCompile>
+    <ClCompile Include="src\Water.cpp">
+      <Filter>File di origine\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BoundingBox.cpp">
+      <Filter>File di origine\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\GameManager.h">
@@ -93,6 +99,12 @@
       <Filter>File di intestazione\objects</Filter>
     </ClInclude>
     <ClInclude Include="include\SmoothTransition.h">
+      <Filter>File di intestazione\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Water.h">
+      <Filter>File di intestazione\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\BoundingBox.h">
       <Filter>File di intestazione\objects</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,7 +6,7 @@
 using namespace std;
 
 Sphere::Sphere(vec4 position, float radius)
-	: radius(radius), Colorable(1.0,1.0,1.0), BaseObject(position)
+	: radius(radius), Colorable(1.0,1.0,1.0), Movable(position)
 {
 }
 

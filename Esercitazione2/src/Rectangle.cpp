@@ -6,9 +6,15 @@ using namespace std;
 using namespace GameObjects;
 
 Rectangle::Rectangle(vec4 position, float width, float height) 
-	: width(width), height(height), Colorable(1.0,1.0,1.0), BaseObject(position)
+	: width(width), height(height), Colorable(1.0,1.0,1.0), Movable(position),
+	BoundingBox(position, width, height, false)
 {
 	computeVertices(position, width, height);
+}
+
+void Rectangle::move(vec4 position) {
+	Movable::move(position);
+	updateBoundingBox(position, width, height);
 }
 
 void Rectangle::computeVertices(vec4 position, float width, float height) {
