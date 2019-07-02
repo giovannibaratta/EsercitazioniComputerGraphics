@@ -13,6 +13,7 @@ private:
 	Sphere *bottom;
 	Triangle *top;
 	float size;
+	vec4 bottomOffset, topOffset;
 
 public:
 	virtual void init();

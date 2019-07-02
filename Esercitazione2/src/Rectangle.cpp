@@ -46,8 +46,6 @@ void Rectangle::init() {
 	glBufferData(GL_ARRAY_BUFFER, 3 * 4 * sizeof(float), rectangleVertices, GL_STATIC_DRAW);
 	// rimuovo il binding
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	cout << "Rec ID" << rectangleVboID << "\n";
 }
 
 void Rectangle::draw() {

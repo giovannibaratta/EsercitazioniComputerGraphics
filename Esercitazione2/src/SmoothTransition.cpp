@@ -18,8 +18,6 @@ void SmoothTransition::setTargetPosition(vec4 targetPosition, float time) {
 	speed = distance / time;
 	lastUpdate = clock();
 	target = targetPosition;
-	cout << "Target : " << vec4ToString(targetPosition) << ", distance : " <<
-					distance << ", speed : " << speed << "\n";
 }
 
 void SmoothTransition::worldUptadeEvent() {

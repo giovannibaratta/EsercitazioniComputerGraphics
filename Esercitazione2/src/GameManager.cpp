@@ -10,7 +10,8 @@
 using namespace std;
 
 GameManager::GameManager(int winWidth, int winHeight)
-	: winWidth(winWidth), winHeight(winHeight)
+	: winWidth(winWidth), winHeight(winHeight), score(0), lastSpawn(0),
+	deletedWater(0), spawnedWater(0), gameEnd(false)
 {
 	buildWorld();
 }
@@ -33,10 +34,6 @@ void GameManager::buildWorld() {
 	bucket->setColor(1.0, 0.0, 0.0);
 	bucket->enableCollision();
 
-	Water* test = new Water(vec4(50.0,75.0, NEAR_Z, 1.0), 10);
-	test->setColor(1.0, 0.0, 0.0);
-	test->enableCollision();
-
 	screenEnd
 		= new GameObjects::Rectangle(vec4(0.0, 0.0, 0.0, 1.0), winWidth, 1.0);
 	screenEnd->enableCollision();
@@ -46,18 +43,38 @@ void GameManager::buildWorld() {
 	registerObject(sky);
 	registerObject(grass);
 	registerObject(bucket);
-	registerObject(test);
 	registerObject(screenEnd);
 
-	bucket->inCollisionWith(*test);
-	cout << "BUCKET ID " << bucket->getID() << endl;
-	cout << "WATER ID " << test->getID() << endl;
 	bucketHandler = new SmoothTransition(bucket);
-	movementHandler.push_back(bucketHandler);
+	movementHandler[bucket->getID()] = bucketHandler;
 }
 
 GameManager::~GameManager()
 {
+}
+
+void GameManager::spawnWater() {
+	if (spawnedWater >= WATER_TO_SPAWN)
+		return;
+
+	float currentTime = static_cast<float>(clock()) / (CLOCKS_PER_SEC / 1000);
+	
+	if (currentTime - lastSpawn < SPAWN_EVERY_MS)
+		return;
+
+	float randomXPos = RandomGenerator::getGenerator()->generateValue(20, winWidth - 20);
+	Water* drop = new Water(vec4(randomXPos, winHeight + 50, NEAR_Z, 1.0), 10);
+	drop->setColor(0.0, 0.0, 1.0);
+	drop->enableCollision();
+
+	SmoothTransition* waterHandler = new SmoothTransition(drop);
+	waterHandler->setTargetPosition(vec4(randomXPos, 0.0, NEAR_Z, 1.0), TIME_TO_REACH_FLOOR);
+
+	registerObject(drop);
+	movementHandler[drop->getID()] = waterHandler;
+
+	spawnedWater += 1;
+	lastSpawn = currentTime;
 }
 
 void GameManager::displayUpdate() {
@@ -66,12 +83,10 @@ void GameManager::displayUpdate() {
 }
 
 void GameManager::worldUpdate() {
-	for (auto transition : movementHandler)
-		transition->worldUptadeEvent();
-	// fai cadere le gocce
-
-	vector<BaseObject*> objectsToDelete;
-	vector<int> indexToDelete;
+	cleanObjects();
+	spawnWater();
+	for (auto keyValuePair : movementHandler)
+		keyValuePair.second->worldUptadeEvent();
 
 	// controlla le collisioni
 	for (int i = 0; i < objectWithBB.size() - 1; i++)
@@ -80,47 +95,43 @@ void GameManager::worldUpdate() {
 			BoundingBox* objI = dynamic_cast<BoundingBox*>(objectWithBB[i]);
 			BoundingBox* objJ = dynamic_cast<BoundingBox*>(objectWithBB[j]);
 			if (objI->inCollisionWith(*objJ)) {
-				cout << objectWithBB[i]->getID() <<  "Collision" << objectWithBB[j]->getID() << endl;
 				if (objectWithBB[i] == bucket) {
 					// coliisione tra cestino e goccia
 					objectsToDelete.push_back(objectWithBB[j]);
 					indexToDelete.push_back(j);
 					bucket->increaseLevel();
+					score += 1;
 				}
-					
-				if (objectWithBB[i] == screenEnd) {
+				else if (objectWithBB[j] == bucket) {
+					objectsToDelete.push_back(objectWithBB[i]);
+					indexToDelete.push_back(i);
+					bucket->increaseLevel();
+					score += 1;
+				}
+				else if (objectWithBB[i] == screenEnd) {
 					objectsToDelete.push_back(objectWithBB[j]);
 					indexToDelete.push_back(j);
+				}else if (objectWithBB[j] == screenEnd) {
+					objectsToDelete.push_back(objectWithBB[i]);
+					indexToDelete.push_back(i);
 				}
 			}
 		}
+	checkWinCondition();
+}
 
-	// elimino le gocce
-	for (auto obj : objectsToDelete) {
-		string id = obj->getID();
-		obj->cleanUp();
-		delete obj;
-		objects.erase(id);
-		cout << "ID" << id;
-	}
-
-	int count = 0;
-	for (auto index : indexToDelete) {
-		objectWithBB.erase(objectWithBB.begin() + index-count);
-		count += 1;
-	}
-
-	/*
-	for (int i = 0; i < indexToDelete.size(); i++) {
-		int index = indexToDelete[i];
-		
-		BaseObject* obj = objects[objectWithBBID[index - 1]];
-		objects.erase(objectWithBBID[index - 1]);
-		obj->cleanUp();
-		delete obj;
-		objectWithBB.erase(objectWithBB.begin()+(index-i));
-		objectWithBBID.erase(objectWithBBID.begin() + (index - i));
-	}	*/
+void GameManager::checkWinCondition() {
+	if (gameEnd)
+		return;
+	if (deletedWater < WATER_TO_SPAWN)
+		return;
+	// controllo vittoria o sconfitta
+	gameEnd = true;
+	if (score == WATER_TO_SPAWN)
+		cout << "HAI VINTO" << endl;
+	else
+		cout << "HAI PERSO" << endl;
+	//spawnFireworks();
 }
 
 bool GameManager::registerObject(BaseObject *obj) {
@@ -140,8 +151,28 @@ void GameManager::deregisterObject(BaseObject* obj) {
 	obj->cleanUp();
 }
 
+void GameManager::cleanObjects()
+{
+	// elimino le gocce
+	for (auto obj : objectsToDelete) {
+		string id = obj->getID();
+		obj->cleanUp();
+		delete obj;
+		objects.erase(id);
+		movementHandler.erase(id);
+		deletedWater += 1;
+	}
+
+	int count = 0;
+	for (auto index : indexToDelete) {
+		objectWithBB.erase(objectWithBB.begin() + index - count);
+		count += 1;
+	}
+	objectsToDelete.clear();
+	indexToDelete.clear();
+}
+
 void GameManager::keyPressed(KEY key) {
-	std::cout << "Key pressed " << key << "\n";
 	
 	if (key == LEFT) {
 		vec4 newPosition = bucket->getPosition() + vec4(-stepSize, 0.0, 0.0, 0.0);

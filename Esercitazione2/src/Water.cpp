@@ -1,6 +1,9 @@
+#include <iostream>
+
 #include "../include/Water.h"
+#include "../include/utils.h"
 
-
+using namespace std;
 
 void Water::init()
 {
@@ -10,6 +13,10 @@ void Water::init()
 
 void Water::draw()
 {
+	//cout << "Base Position" << vec4ToString(position) << endl;
+	//cout << "bottom Position" << vec4ToString(bottom->getPosition()) << endl;
+	//cout << "top Position" << vec4ToString(top->getPosition()) << endl;
+
 	bottom->draw();
 	top->draw();
 }
@@ -30,8 +37,9 @@ void Water::setColor(float r, float g, float b)
 
 void Water::move(vec4 position)
 {
-	bottom->move(position);
-	top->move(position);
+	Movable::move(position);
+	bottom->move(position + bottomOffset);
+	top->move(position + topOffset);
 	updateBoundingBox(position, size * 2, size * 2);
 }
 
@@ -40,6 +48,8 @@ Water::Water(vec4 position, float size) :
 	size(size), Colorable(1.0,1.0,1.0),
 	Movable(position),  BoundingBox(position, size * 2, size * 2, false)
 {
-	bottom = new Sphere(position + vec4(size, size , 0.0, 0.0), size);
-	top = new Triangle(position + vec4(0, size * 1.15, 0.0, 0.0), size * 2);
+	bottomOffset = vec4(size, size, 0.0, 0.0);
+	topOffset = vec4(0, size * 1.15, 0.0, 0.0);
+	bottom = new Sphere(position + bottomOffset, size);
+	top = new Triangle(position + topOffset, size * 2);
 }
