@@ -3,9 +3,11 @@
 
 #include "../include/Bucket.h"
 
+/* La bouding box del contenitore è una piccolo rettangolo a partire dalla parte superiore
+ dell'oggetto (necessaria per rilevare le collisioni con le gocce) */
 Bucket::Bucket(vec4 position, float width, float height, int maxCapacity)
 	: width(width), height(height), maxCapacity(maxCapacity),
-		Movable(position), Colorable(0.0,0.0,0.0),
+	Movable(position), Colorable(0.0,0.0,0.0), currentLevel(0), contentHeight(0),
 	BoundingBox(position + vec4(0.0, height / 9 * 10, 0.0, 0.0), width, height / 10, false)
 {
 	computeVertices(position, width, height);

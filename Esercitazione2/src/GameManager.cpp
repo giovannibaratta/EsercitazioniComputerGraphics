@@ -53,6 +53,7 @@ void GameManager::buildWorld() {
 }
 
 void GameManager::spawnWater() {
+	// genero le gocce in posizioni casuali
 	if (spawnedWater >= WATER_TO_SPAWN)
 		return;
 
@@ -77,13 +78,21 @@ void GameManager::spawnWater() {
 }
 
 void GameManager::displayUpdate() {
+	// chiedo agli oggetti di disegnarsi
 	for (auto keyValuePair : objects)
 		keyValuePair.second->draw();
 }
 
+/**
+verifico le collissioni tra gli oggetti. se c'è una collisione tra goccia e contenitore,
+aggiorno il livello del contenitore, aumento lo score e la elimino.
+Se la goccia cade, la elimino.
+*/
 void GameManager::worldUpdate() {
 	cleanObjects();
 	spawnWater();
+
+	/* propago l'aggiornamento del movimento agli handler */
 	for (auto keyValuePair : movementHandler)
 		keyValuePair.second->worldUpdateEvent();
 
@@ -148,6 +157,7 @@ bool GameManager::registerObject(BaseObject *obj) {
 		return false;
 	objects[obj->getID()] = obj;
 	obj->init();
+	// se l'oggetto ha una bouding box lo aggiungo alla lista
 	if (BoundingBox * bb = dynamic_cast<BoundingBox*>(obj))
 		objectWithBB.push_back(obj);
 
@@ -180,6 +190,7 @@ void GameManager::cleanObjects()
 	indexToDelete.clear();
 }
 
+/** gestione dell'input */
 void GameManager::keyPressed(KEY key) {
 	
 	if (key == LEFT) {

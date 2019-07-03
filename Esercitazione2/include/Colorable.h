@@ -1,4 +1,8 @@
 #pragma once
+
+/**
+	Classe che aggiunge il colore ad un oggetto.
+*/
 class Colorable
 {
 	protected:

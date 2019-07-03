@@ -14,6 +14,7 @@ SmoothTransition::SmoothTransition(Movable* movable)
 
 // time in ms
 void SmoothTransition::setTargetPosition(vec4 targetPosition, float time) {
+	callbackCalled = false;
 	float distance = glm::distance(targetPosition, movable->getPosition());
 	speed = distance / time;
 	lastUpdate = clock();
@@ -23,6 +24,8 @@ void SmoothTransition::setTargetPosition(vec4 targetPosition, float time) {
 void SmoothTransition::worldUpdateEvent() {
 	vec4 objectPos = movable->getPosition();
 	float distanceFromTarget = abs(length(objectPos - target));
+	/* se non sono vicino al target calcolo il vettore verso il nuovo target, ed in base
+	al tempo trascordo dall'ultimo update mi sposto in quella direzione */
 	if (distanceFromTarget > 0.5) {
 		clock_t newUpdate = clock();
 		float differenceLastUpdate = ((float)newUpdate - lastUpdate) / (CLOCKS_PER_SEC / 1000);
@@ -37,6 +40,7 @@ void SmoothTransition::worldUpdateEvent() {
 		lastUpdate = newUpdate;
 	}
 
+	// se ho raggiunto il target chiao la callback registrata (se presente)
 	if (distanceFromTarget <= 0.5 && !callbackCalled && callback != NULL) {
 		callbackCalled = true;
 		callback -> callback();

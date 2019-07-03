@@ -12,6 +12,8 @@ constexpr auto PI = 3.14159265358979323846;
 double degreeToRadians(double degree);
 string vec4ToString(vec4 position);
 
+
+/** Generatore di numeri casuali */
 class RandomGenerator {
 
 public:

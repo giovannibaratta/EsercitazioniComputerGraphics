@@ -13,10 +13,6 @@ void Water::init()
 
 void Water::draw()
 {
-	//cout << "Base Position" << vec4ToString(position) << endl;
-	//cout << "bottom Position" << vec4ToString(bottom->getPosition()) << endl;
-	//cout << "top Position" << vec4ToString(top->getPosition()) << endl;
-
 	bottom->draw();
 	top->draw();
 }

@@ -19,6 +19,9 @@ bool BoundingBox::inCollisionWith(BoundingBox otherBb)
 	float minX, otherX, minWidth, otherWidth;
 	float minY, otherY, minHeight, otherHeight;
 
+	/* Calcolo la bouding box con coordinata x e y minore (separatamente) e verifico
+	se l'altra è compresa tra la coordinata + la rispettiva dimension. Se sia in x che in
+	y si sovrappongono c'è una collisione */
 	if (boundingBox.x < otherBb.boundingBox.x) {
 		minX = boundingBox.x;
 		minWidth = width;

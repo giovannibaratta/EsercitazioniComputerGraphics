@@ -77,21 +77,6 @@ void arrowHandler(int key, int x, int y) {
 	}
 }
 
-/*
-void GLAPIENTRY
-MessageCallback(GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar* message,
-	const void* userParam)
-{
-	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
-		type, severity, message);
-}*/
-
 #pragma region OpenGL version
 // https://www.badprog.com/c-opengl-checking-the-freeglut-glew-and-opengl-version
 string makeMeString(GLint versionRaw) {

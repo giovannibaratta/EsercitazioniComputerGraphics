@@ -6,8 +6,7 @@
 Sun::Sun(vec4 position, float radius) :
 	minRay(radius * 0.8),
 	maxRay(radius * 1.2), radius(radius),
-	rayColor(Colorable(1.0, 1.0, 1.0)),
-	increasing(true), Sphere(position, radius)
+	rayColor(Colorable(1.0, 1.0, 1.0)), Sphere(position, radius)
 {
 }
 
@@ -20,10 +19,13 @@ void Sun::draw() {
 	// current time in ms (int value)
 	int currentMs
 		= static_cast<int>(round(static_cast<double>(currentDraw) / (CLOCKS_PER_SEC / 1000)));
+	// in base al tempo passato dall'inizio calcolo % di animazione e stato. Lo stato è
+	// allungo i raggi pari/accorcio quelli dispari o accorcio i raggi pari e allungo
+	// quelli dispari
 	float animationPercentage =
 		(currentMs % ANIMATION_DURATION) / static_cast<float>(ANIMATION_DURATION);
 	bool animationPhase = (currentMs / ANIMATION_DURATION) % 2 == 0;
-
+	// disegno tutti i raggi
 	drawRays(
 		animationPhase == 0 ? animationPercentage : 1 - animationPercentage
 	);
@@ -36,7 +38,6 @@ void Sun::drawRays(float size) {
 	glTranslatef(position.x, position.y, position.z + 0.05);
 	glBegin(GL_LINES);
 
-	
 	float evenHalfSegment = (minRay * size + (1 - size) * maxRay) / 2;
 	float oddHalfSegment = (minRay * (1 - size) + size * maxRay) / 2;
 
