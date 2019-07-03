@@ -63,6 +63,12 @@
     <ClCompile Include="src\BoundingBox.cpp">
       <Filter>File di origine\objects</Filter>
     </ClCompile>
+    <ClCompile Include="include\Fireworks.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="include\WorldUpdateListener.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\GameManager.h">
@@ -105,6 +111,15 @@
       <Filter>File di intestazione\objects</Filter>
     </ClInclude>
     <ClInclude Include="include\BoundingBox.h">
+      <Filter>File di intestazione\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Fireworks.h">
+      <Filter>File di intestazione\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\WorldUpdateListener.h">
+      <Filter>File di intestazione\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Callback.h">
       <Filter>File di intestazione\objects</Filter>
     </ClInclude>
   </ItemGroup>

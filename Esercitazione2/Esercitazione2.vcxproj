@@ -120,6 +120,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\Fireworks.cpp" />
+    <ClCompile Include="include\WorldUpdateListener.cpp" />
     <ClCompile Include="src\BaseObject.cpp" />
     <ClCompile Include="src\BoundingBox.cpp" />
     <ClCompile Include="src\Bucket.cpp" />
@@ -139,7 +141,9 @@
     <ClInclude Include="include\BaseObject.h" />
     <ClInclude Include="include\BoundingBox.h" />
     <ClInclude Include="include\Bucket.h" />
+    <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\Colorable.h" />
+    <ClInclude Include="include\Fireworks.h" />
     <ClInclude Include="include\GameManager.h" />
     <ClInclude Include="include\Movable.h" />
     <ClInclude Include="include\random\random.hpp" />
@@ -150,6 +154,7 @@
     <ClInclude Include="include\Triangle.h" />
     <ClInclude Include="include\utils.h" />
     <ClInclude Include="include\Water.h" />
+    <ClInclude Include="include\WorldUpdateListener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

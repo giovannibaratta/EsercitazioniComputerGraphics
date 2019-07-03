@@ -31,7 +31,6 @@ void Sun::draw() {
 
 void Sun::drawRays(float size) {
 	glPushMatrix();
-	glLineWidth(2);
 	glMatrixMode(GL_MODELVIEW);
 	glColor3f(rayColor.getRedColor(), rayColor.getGreenColor(), rayColor.getBlueColor());
 	glTranslatef(position.x, position.y, position.z + 0.05);

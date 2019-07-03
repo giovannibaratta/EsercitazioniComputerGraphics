@@ -70,7 +70,6 @@ void Bucket::draw() {
 	glMatrixMode(GL_MODELVIEW);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glColor3f(color[0], color[1], color[2]);
-	glLineWidth(2);
 	glTranslatef(position.x, position.y, position.z);
 	// attivo il vbo
 	glBindBuffer(GL_ARRAY_BUFFER, outerVboID);

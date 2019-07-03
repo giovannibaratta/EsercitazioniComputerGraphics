@@ -5,7 +5,8 @@
 #include "BaseObject.h"
 #include "Bucket.h"
 #include "SmoothTransition.h"
-#include "../include/Rectangle.h"
+#include "Rectangle.h"
+#include "Fireworks.h"
 
 using namespace std;
 
@@ -14,8 +15,7 @@ class GameManager
 {
 public:
 	GameManager(int winWidth, int winHeight);
-	~GameManager();
-
+	
 	void displayUpdate();
 	void worldUpdate();
 
@@ -29,6 +29,7 @@ public:
 
 private:
 	const float FAR_Z = 0.1;
+	const float MID_Z = 0.5;
 	const float NEAR_Z = 0.9;
 	int winWidth;
 	int winHeight;
@@ -54,12 +55,12 @@ private:
 	float TIME_TO_REACH_FLOOR = 1000 * 3;
 	float lastSpawn;
 	void spawnWater();
+	void spawnFireworks();
 	// bucket
 	Bucket* bucket;
 	int bucketWidth = 40;
 	int bucketMaxCapacity = 4;
 	SmoothTransition* bucketHandler;
-
+	Fireworks *fire;
 	GameObjects::Rectangle* screenEnd;
 };
-

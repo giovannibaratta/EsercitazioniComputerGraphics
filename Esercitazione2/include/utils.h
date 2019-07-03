@@ -15,13 +15,20 @@ string vec4ToString(vec4 position);
 class RandomGenerator {
 
 public:
-	static RandomGenerator* getGenerator();
-	int generateValue(int minValue, int maxValue);
+	float generateFloatValue();
+	int generateIntValue();
+	RandomGenerator(float minValue, float maxValue);
+
+	void updateFloatCache();
+	void updateIntCache();
 
 private:
+	static const int CACHE_SIZE = 10000;
+	int floatCount;
+	int intCount;
+	float floatCache[CACHE_SIZE];
+	int intCache[CACHE_SIZE];
 	mt19937 generator;
-	RandomGenerator();
-	static bool init;
-	static RandomGenerator* pointer;
-
+	uniform_int_distribution<int> intDist;
+	uniform_real_distribution<float> floatDist;	
 };

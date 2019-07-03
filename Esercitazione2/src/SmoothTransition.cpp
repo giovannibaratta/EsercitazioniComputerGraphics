@@ -7,7 +7,7 @@
 using namespace std;
 
 SmoothTransition::SmoothTransition(Movable* movable)
-	: movable(movable), target(movable->getPosition()),
+	: callbackCalled(false), callback(NULL),movable(movable), target(movable->getPosition()),
 		speed(0), lastUpdate(0)
 {
 }
@@ -20,9 +20,10 @@ void SmoothTransition::setTargetPosition(vec4 targetPosition, float time) {
 	target = targetPosition;
 }
 
-void SmoothTransition::worldUptadeEvent() {
+void SmoothTransition::worldUpdateEvent() {
 	vec4 objectPos = movable->getPosition();
-	if (abs(length(objectPos-target)) > 0.5) {
+	float distanceFromTarget = abs(length(objectPos - target));
+	if (distanceFromTarget > 0.5) {
 		clock_t newUpdate = clock();
 		float differenceLastUpdate = ((float)newUpdate - lastUpdate) / (CLOCKS_PER_SEC / 1000);
 		vec4 direction = - normalize(objectPos - target) * speed * differenceLastUpdate;
@@ -35,9 +36,14 @@ void SmoothTransition::worldUptadeEvent() {
 			movable->move(target);
 		lastUpdate = newUpdate;
 	}
+
+	if (distanceFromTarget <= 0.5 && !callbackCalled && callback != NULL) {
+		callbackCalled = true;
+		callback -> callback();
+	}
 }
 
-SmoothTransition::~SmoothTransition() {
-
+void SmoothTransition::onTransitionEndCallback(Callback* callback)
+{
+	this->callback = callback;
 }
-

@@ -2,11 +2,13 @@
 #include <time.h>
 
 #include "Movable.h"
+#include "WorldUpdateListener.h"
+#include "Callback.h"
 
 using namespace glm;
 
 #pragma once
-class SmoothTransition
+class SmoothTransition : public WorldUpdateListener
 {
 	private:
 		Movable* movable;
@@ -14,11 +16,13 @@ class SmoothTransition
 		// speed = [unit / ms]
 		float speed;
 		clock_t lastUpdate;
+		bool callbackCalled;
+		Callback* callback;
 
 	public:
 		SmoothTransition(Movable* movable);
-		~SmoothTransition();
 
 		void setTargetPosition(vec4 targetPosition, float time);
-		void worldUptadeEvent();
+		virtual void worldUpdateEvent();
+		void onTransitionEndCallback(Callback* callback);
 };

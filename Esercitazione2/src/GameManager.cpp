@@ -6,12 +6,15 @@
 #include "../include/Sphere.h"
 #include "../include/Sun.h"
 #include "../include/Water.h"
+#include "../include/random/random.hpp"
+#include "../include/Fireworks.h"
 
 using namespace std;
+using Random = effolkronium::random_static;
 
 GameManager::GameManager(int winWidth, int winHeight)
 	: winWidth(winWidth), winHeight(winHeight), score(0), lastSpawn(0),
-	deletedWater(0), spawnedWater(0), gameEnd(false)
+	deletedWater(0), spawnedWater(0), gameEnd(false), fire(NULL)
 {
 	buildWorld();
 }
@@ -26,16 +29,16 @@ void GameManager::buildWorld() {
 		new GameObjects::Rectangle(vec4(0.0, 0.0, FAR_Z,1.0), winWidth, winHeight-200);
 	grass->setColor(0.082, 0.415, 0.188);
 
-	Sun* sun = new Sun(vec4(100.0, winHeight-50, NEAR_Z, 1.0), 20);
+	Sun* sun = new Sun(vec4(100.0, winHeight-50, MID_Z, 1.0), 20);
 	sun->setColor(1.0, 1.0, 0.0);
 	sun->setRayColor(0.949, 0.737, 0.388);
 
-	bucket = new Bucket(vec4(winWidth/2-bucketWidth/2, 50, NEAR_Z, 1.0), bucketWidth, 40, bucketMaxCapacity);
+	bucket = new Bucket(vec4(winWidth/2-bucketWidth/2, 50, MID_Z, 1.0), bucketWidth, 40, bucketMaxCapacity);
 	bucket->setColor(1.0, 0.0, 0.0);
 	bucket->enableCollision();
 
 	screenEnd
-		= new GameObjects::Rectangle(vec4(0.0, 0.0, 0.0, 1.0), winWidth, 1.0);
+		= new GameObjects::Rectangle(vec4(0.0, 0.0, FAR_Z, 1.0), winWidth, 1.0);
 	screenEnd->enableCollision();
 	screenEnd ->setColor(0.082, 0.415, 0.188);
 
@@ -49,10 +52,6 @@ void GameManager::buildWorld() {
 	movementHandler[bucket->getID()] = bucketHandler;
 }
 
-GameManager::~GameManager()
-{
-}
-
 void GameManager::spawnWater() {
 	if (spawnedWater >= WATER_TO_SPAWN)
 		return;
@@ -62,7 +61,7 @@ void GameManager::spawnWater() {
 	if (currentTime - lastSpawn < SPAWN_EVERY_MS)
 		return;
 
-	float randomXPos = RandomGenerator::getGenerator()->generateValue(20, winWidth - 20);
+	float randomXPos = Random::get(20, winWidth - 20);
 	Water* drop = new Water(vec4(randomXPos, winHeight + 50, NEAR_Z, 1.0), 10);
 	drop->setColor(0.0, 0.0, 1.0);
 	drop->enableCollision();
@@ -86,7 +85,7 @@ void GameManager::worldUpdate() {
 	cleanObjects();
 	spawnWater();
 	for (auto keyValuePair : movementHandler)
-		keyValuePair.second->worldUptadeEvent();
+		keyValuePair.second->worldUpdateEvent();
 
 	// controlla le collisioni
 	for (int i = 0; i < objectWithBB.size() - 1; i++)
@@ -118,6 +117,8 @@ void GameManager::worldUpdate() {
 			}
 		}
 	checkWinCondition();
+	if(fire != NULL)
+		fire->worldUpdateEvent();
 }
 
 void GameManager::checkWinCondition() {
@@ -127,11 +128,18 @@ void GameManager::checkWinCondition() {
 		return;
 	// controllo vittoria o sconfitta
 	gameEnd = true;
-	if (score == WATER_TO_SPAWN)
+	if (score == WATER_TO_SPAWN) {
 		cout << "HAI VINTO" << endl;
+		spawnFireworks();
+	}
 	else
 		cout << "HAI PERSO" << endl;
-	//spawnFireworks();
+}
+
+void GameManager::spawnFireworks() {
+	fire = new Fireworks(vec4(300.0, 0.0, NEAR_Z, 1.0),
+		vec4(300.0, winHeight * 0.6, NEAR_Z, 1.0), 1000, 200, 30, new RandomGenerator(-100, 100));
+	registerObject(fire);
 }
 
 bool GameManager::registerObject(BaseObject *obj) {
