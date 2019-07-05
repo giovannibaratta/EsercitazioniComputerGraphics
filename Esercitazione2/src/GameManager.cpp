@@ -147,7 +147,7 @@ void GameManager::checkWinCondition() {
 
 void GameManager::spawnFireworks() {
 	fire = new Fireworks(vec4(300.0, 0.0, NEAR_Z, 1.0),
-		vec4(300.0, winHeight * 0.6, NEAR_Z, 1.0), 1000, 200, 30, new RandomGenerator(-100, 100));
+		vec4(300.0, winHeight * 0.65, NEAR_Z, 1.0), 800, 200, 30, new RandomGenerator(-100, 100));
 	registerObject(fire);
 }
 
