@@ -22,15 +22,13 @@ based on the OpenGL Shading Language (GLSL) specifications.
 #include <string>
 #include <unordered_map>
 #include <iostream>
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "HUD_Logger.h"
-
-#include "utils.h"
 
 #define SHIFT_WHEEL_UP 11
 #define SHIFT_WHEEL_DOWN 12
@@ -71,7 +69,6 @@ typedef struct {
 typedef struct {
 	Mesh mesh;
 	MaterialType material;
-	// posizionamento rispetto all'OCS
 	GLfloat model_matrix[16];
 	string name;
 } Object;
@@ -92,8 +89,25 @@ static glm::vec4 lightpos = { 5.0f, 5.0f, 5.0f, 1.0f };
 /*camera structures*/
 constexpr float CAMERA_ZOOM_SPEED = 0.1f;
 constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
-
 constexpr float CAMERA_SHIFT = 0.5f;
+constexpr float CAMERA_SPEED = 0.1f;
+
+float multiplier = 10.0f;
+glm::vec4 cameraPathControlPoint[8] = {
+	glm::vec4(0.0, 0.0, 1.0, 1.0) * multiplier,
+	glm::vec4(1.0, 0.0, 1.0, 1.0) * multiplier,
+	glm::vec4(0.8, 0.0, 0.0, 1.0) * multiplier,
+	glm::vec4(0.5, 0.0, -1.0, 1.0) * multiplier,
+	glm::vec4(-0.7, 0.0, -0.7, 1.0) * multiplier,
+	glm::vec4(0.5, 0.0, 0.2, 1.0) * multiplier,
+	glm::vec4(-1.0, 0.0, 1.0, 1.0) * multiplier,
+	glm::vec4(0.0, 0.0, 1.0, 1.0) * multiplier
+};
+
+bool cameraPathEnabled = false;
+// in ms
+float lastUpdate = 0;
+float pathCovered = 0.0;
 
 struct {
 	glm::vec4 position;
@@ -106,6 +120,7 @@ struct {
 } PerspectiveSetup;
 
 typedef enum {
+	CAMERA_PATH,
 	WIRE_FRAME,
 	FACE_FILL,
 	FLAT_SHADING,
@@ -164,8 +179,11 @@ void moveCameraLeft();
 void moveCameraRight();
 void moveCameraUp();
 void moveCameraDown();
+glm::mat4 vcsToWcsMatrix();
+float currentTime();
+void updateDisplay(int value);
+
 /*
-	//TODO
 	Crea ed applica la matrice di trasformazione alla matrice dell'oggeto discriminando tra WCS e OCS.
 	La funzione è gia invocata con un input corretto, è sufficiente concludere la sua implementazione.
 */
@@ -182,55 +200,7 @@ void drawGrid(float scale, int dimension);
 /*Logging to screen*/
 void printToScreen();
 
-#pragma region print opengl debug messages
-// https://learnopengl.com/In-Practice/Debugging
-void APIENTRY glDebugOutput(GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar* message,
-	void* userParam)
-{
-	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-	std::cout << "---------------" << std::endl;
-	std::cout << "Debug message (" << id << "): " << message << std::endl;
-
-	switch (source)
-	{
-	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-	} std::cout << std::endl;
-
-	switch (type)
-	{
-	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-	} std::cout << std::endl;
-
-	switch (severity)
-	{
-	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-	} std::cout << std::endl;
-	std::cout << std::endl;
-}
-#pragma endregion
+void deCasteljau(float param, float* result);
 
 int main(int argc, char** argv) {
 	GLboolean GlewInitResult;
@@ -240,7 +210,6 @@ int main(int argc, char** argv) {
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Model Viewer ");
 
-	
 	glutDisplayFunc(display);
 	glutReshapeFunc(resize);
 	glutKeyboardFunc(keyboardDown);
@@ -263,18 +232,21 @@ int main(int argc, char** argv) {
 		"INFO: OpenGL Version: %s\n",
 		glGetString(GL_VERSION)
 	);
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(glDebugOutput, 0);
 	init();
 	buildOpenGLMenu();
 
+	updateDisplay(0);
 	glutMainLoop();
 
 	return 1;
 }
 
+float currentTime() {
+	return clock() / (CLOCKS_PER_SEC / 1000);
+}
+
 void init() {
-	// Default render settings
+// Default render settings
 	OperationMode = NAVIGATION;
 	
 	glEnable(GL_DEPTH_TEST);	// Hidden surface removal
@@ -322,7 +294,7 @@ void init() {
 
 	// Camera Setup
 	ViewSetup = {};
-	ViewSetup.position = glm::vec4(0.0, 0.0, -5.0, 1.0);
+	ViewSetup.position = glm::vec4(10.0, 10.0, 10.0, 1.0);
 	ViewSetup.target = glm::vec4(0.0, 0.0, 0.0, 1.0);
 	ViewSetup.upVector = glm::vec4(0.0, 1.0, 0.0, 0.0);
 	PerspectiveSetup = {};
@@ -363,7 +335,7 @@ void init() {
 	glTranslatef(-2.0, 0.0, -2.0);
 	glGetFloatv(GL_MODELVIEW_MATRIX, object.model_matrix);
 	objects.push_back(object);
-	
+
 	object.mesh = hand;
 	object.material = MaterialType::RED_PLASTIC;
 	object.name = "Hand";
@@ -376,6 +348,36 @@ void init() {
 
 	selectedObject = 0;
 }
+
+void deCasteljau(float param, float* result) {
+
+	float tempPoints[8][3];
+	int i = 0;
+	int j = 0;
+	int tempNPoints = 8;
+	// copio i punti
+	for (i = 0; i < 8; i++) {
+		tempPoints[i][0] = cameraPathControlPoint[i][0];
+		tempPoints[i][1] = cameraPathControlPoint[i][1];
+		tempPoints[i][2] = cameraPathControlPoint[i][2];
+	}
+
+	// le interpolazioni devono essere fatte fino ad ottenere un unico punto
+	while (tempNPoints > 1) {
+		// faccio le interpolazioni sui segmenti
+		for (i = 0; i < 8 - 1; i++) {
+			tempPoints[i][0] = (1 - param) * tempPoints[i][0] + param * tempPoints[i + 1][0];
+			tempPoints[i][1] = (1 - param) * tempPoints[i][1] + param * tempPoints[i + 1][1];
+			tempPoints[i][2] = (1 - param) * tempPoints[i][2] + param * tempPoints[i + 1][2];
+		}
+		tempNPoints--;
+	}
+
+	result[0] = tempPoints[0][0];
+	result[1] = tempPoints[0][1];
+	result[2] = tempPoints[0][2];
+}
+
 
 void display() {
 	glClearColor(0.5, 0.5, 0.5, 1);
@@ -392,7 +394,7 @@ void display() {
 	drawAxis(3.0, 1); // The central Axis point of reference
 	drawGrid(10.0, 100); // The horizontal grid
 	glEnable(GL_LIGHTING);
-	
+
 	for (int i = 0; i < objects.size(); i++) {
 		glPushMatrix();
 		// disegno asse locale all'oggetto
@@ -417,7 +419,25 @@ void display() {
 
 	printToScreen();
 
+	if (cameraPathEnabled) {
+		// sposta la telecamera lungo la curva
+		float newUpdate = currentTime();
+		pathCovered += (newUpdate - lastUpdate) * CAMERA_SPEED / 1000;
+		if (pathCovered > 1)
+			pathCovered -= static_cast<int>(pathCovered);
+		float result[3];
+		deCasteljau(pathCovered, result);
+		ViewSetup.position = glm::vec4(result[0],result[1], result[2], 1.0);
+		cout << "Path covered" << pathCovered << " new Pos  " << result[0] << " " << result[1] << " " << result[2] << endl;
+		lastUpdate = newUpdate;
+	}
+
 	glutSwapBuffers();
+}
+
+void updateDisplay(int value) {
+	display();
+	glutTimerFunc(16, updateDisplay, 0);
 }
 
 void resize(int w, int h)
@@ -445,8 +465,10 @@ void resize(int w, int h)
 
 void mouseClick(int button, int state, int x, int y)
 {
-	
-	glutPostRedisplay();
+
+	if (cameraPathEnabled)
+		return;
+
 	int modifiers = glutGetModifiers();
 	if (state == GLUT_DOWN) {
 		if (modifiers == GLUT_ACTIVE_SHIFT) {
@@ -519,6 +541,8 @@ void mouseClick(int button, int state, int x, int y)
 	default:
 		break;
 	}
+
+	glutPostRedisplay();
 }
 
 void mouseActiveMotion(int x, int y)
@@ -580,6 +604,7 @@ void keyboardDown(unsigned char key, int x, int y)
 	}
 	glutPostRedisplay();
 }
+
 void special(int key, int x, int y)
 {
 	switch (key)
@@ -588,7 +613,7 @@ void special(int key, int x, int y)
 		selectedObject = selectedObject > 0 ? selectedObject - 1 : objects.size() - 1;
 		break;
 	case GLUT_KEY_RIGHT:
-		selectedObject = selectedObject < objects.size() - 1? selectedObject + 1 : 0;
+		selectedObject = selectedObject < objects.size() - 1 ? selectedObject + 1 : 0;
 		break;
 	default:
 		break;
@@ -600,6 +625,13 @@ void main_menu_func(int option)
 {
 	switch (option)
 	{
+	case MenuOption::CAMERA_PATH:
+		cameraPathEnabled = !cameraPathEnabled;
+		if (cameraPathEnabled) {
+			lastUpdate = currentTime();
+			pathCovered = 0.0;
+		}
+		break;
 	case MenuOption::FLAT_SHADING: glShadeModel(GL_FLAT);
 		break;
 	case MenuOption::SMOOTH_SHADING: glShadeModel(GL_SMOOTH);
@@ -612,9 +644,9 @@ void main_menu_func(int option)
 		break;
 	case MenuOption::CULLING_OFF: glDisable(GL_CULL_FACE);
 		break;
-	case MenuOption::CHANGE_TO_OCS: //TransformMode = OCS;
+	case MenuOption::CHANGE_TO_OCS: TransformMode = OCS;
 		break;
-	case MenuOption::CHANGE_TO_WCS: //TransformMode = WCS;
+	case MenuOption::CHANGE_TO_WCS: TransformMode = WCS;
 		break;
 	default:
 		break;
@@ -635,9 +667,11 @@ void buildOpenGLMenu()
 	glutAddMenuEntry(materials[MaterialType::BRASS].name.c_str(), MaterialType::BRASS);
 	glutAddMenuEntry(materials[MaterialType::SLATE].name.c_str(), MaterialType::SLATE);
 
+
 	glutCreateMenu(main_menu_func); // richiama main_menu_func() alla selezione di una voce menu
 	glutAddMenuEntry("Opzioni", -1); //-1 significa che non si vuole gestire questa riga
 	glutAddMenuEntry("", -1);
+	glutAddMenuEntry("Camera path", MenuOption::CAMERA_PATH);
 	glutAddMenuEntry("Wireframe", MenuOption::WIRE_FRAME);
 	glutAddMenuEntry("Face fill", MenuOption::FACE_FILL);
 	glutAddMenuEntry("Smooth Shading", MenuOption::SMOOTH_SHADING);
@@ -663,22 +697,6 @@ glm::vec3 getTrackBallPoint(float x, float y)
 	return point;
 }
 
-void moveCameraForeward()
-{
-	glm::vec3 w = glm::normalize(ViewSetup.position - ViewSetup.target);
-	glm::vec4 newPos = ViewSetup.position - vec4(w * CAMERA_SHIFT, 0.0);
-	ViewSetup.position = newPos;
-	glutPostRedisplay();
-}
-
-void moveCameraBack()
-{
-	glm::vec3 w = glm::normalize(ViewSetup.position - ViewSetup.target);
-	glm::vec4 newPos = ViewSetup.position + vec4(w * CAMERA_SHIFT, 0.0);
-	ViewSetup.position = newPos;
-	glutPostRedisplay();
-}
-
 glm::mat4 vcsToWcsMatrix() {
 	glm::vec3 vup = ViewSetup.upVector;
 	glm::vec3 w = glm::normalize(ViewSetup.position - ViewSetup.target);
@@ -694,6 +712,20 @@ glm::mat4 vcsToWcsMatrix() {
 	);
 
 	return vcsToWcs;
+}
+
+void moveCameraForeward()
+{
+	glm::vec3 w = glm::normalize(ViewSetup.position - ViewSetup.target);
+	glm::vec4 newPos = ViewSetup.position - glm::vec4(w * CAMERA_SHIFT, 0.0);
+	ViewSetup.position = newPos;
+}
+
+void moveCameraBack()
+{
+	glm::vec3 w = glm::normalize(ViewSetup.position - ViewSetup.target);
+	glm::vec4 newPos = ViewSetup.position + glm::vec4(w * CAMERA_SHIFT, 0.0);
+	ViewSetup.position = newPos;
 }
 
 void moveCameraLeft()
@@ -713,7 +745,7 @@ void moveCameraLeft()
 
 	ViewSetup.position = wcsNewPos;
 	ViewSetup.target = wcsNewTarget;
-	glutPostRedisplay();
+	
 
 	/*
 	cout << "moveLeft WCS" << vec4ToString(ViewSetup.position) << " at " << vec4ToString(ViewSetup.target) << endl;
@@ -739,7 +771,6 @@ void moveCameraRight()
 
 	ViewSetup.position = wcsNewPos;
 	ViewSetup.target = wcsNewTarget;
-	glutPostRedisplay();
 }
 
 void moveCameraUp()
@@ -758,7 +789,6 @@ void moveCameraUp()
 
 	ViewSetup.position = wcsNewPos;
 	ViewSetup.target = wcsNewTarget;
-	glutPostRedisplay();
 }
 
 void moveCameraDown()
@@ -777,7 +807,6 @@ void moveCameraDown()
 
 	ViewSetup.position = wcsNewPos;
 	ViewSetup.target = wcsNewTarget;
-	glutPostRedisplay();
 }
 
 void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, GLfloat angle, GLfloat scale_factor)
@@ -786,10 +815,6 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
 	glLoadIdentity();
 	// Usare glMultMatrix per moltiplicare la matrice attiva in openGL con una propria matrice.
 	// In alternativa si può anche usare glm per creare e manipolare le matrici.
-
-
-	//cout << "Tr " << vec4ToString(translation_vector) << " Rot " << vec4ToString(rotation_vector) << " angle " << angle << " scale factor " << scale_factor << endl;
-	/*
 
 	switch (TransformMode) {
 	case WCS:
@@ -805,8 +830,7 @@ void modifyModelMatrix(glm::vec4 translation_vector, glm::vec4 rotation_vector, 
 		glScalef(scale_factor, scale_factor, scale_factor);
 		break;
 	}
-	*/
-	glGetFloatv(GL_MODELVIEW_MATRIX, objects.at(selectedObject).model_matrix);
+	glGetFloatv(GL_MODELVIEW_MATRIX, objects[selectedObject].model_matrix);
 	glPopMatrix();
 }
 
@@ -827,8 +851,7 @@ void generate_and_load_buffers(Mesh* mesh)
 		(void*)0            // array buffer offset
 	);
 
-	//TODO caricamento normali in memoria
-	// Genero 1 Vertex Buffer Object per i vertici
+	// Genero 1 buffer per le normali
 	glGenBuffers(1, &mesh->normalBufferObjID);
 	glBindBuffer(GL_ARRAY_BUFFER, mesh->normalBufferObjID);
 	glBufferData(GL_ARRAY_BUFFER, mesh->normals.size() * sizeof(glm::vec3), mesh->normals.data(), GL_STATIC_DRAW);
@@ -837,7 +860,6 @@ void generate_and_load_buffers(Mesh* mesh)
 		0,                  // stride
 		(void*)0            // array buffer offset
 	);
-
 
 	// Genero 1 Element Buffer Object per gli indici, Nota: GL_ELEMENT_ARRAY_BUFFER
 	glGenBuffers(1, &mesh->indexBufferObjID);
@@ -867,35 +889,25 @@ void loadObjFile(string file_path, Mesh* mesh)
 			mesh->indices.push_back(a); mesh->indices.push_back(b); mesh->indices.push_back(c);
 		}
 	}
-	
-	std::cout << "init\n";
 
-	// INIT
-	
-	/*
-	for (int i = 0; i < mesh->vertices.size(); i++) {
-		glm::vec3 vertex;
-		vertex.x = 0;
-		vertex.y = 0;
-		vertex.z = 0;
-		mesh->normals.push_back(vertex);
-	}*/
+
 	mesh->normals.resize(mesh->vertices.size(), glm::vec3(0.0, 0.0, 0.0));
-	std::cout << "normali size" << mesh->indices.size() << "\n";
 
 	// CALCOLO NORMALE, PER OGNI TRIANGOLO CALCOLO LA NORMALE
-	// POI LA DEVO ASSEGNARE A TUTTI E 3. ESSENDOCI VERTICI IN COMUNE
+	// POI LA DEVO ASSEGNARE A TUTTI E 3 I VERTICI. ESSENDOCI VERTICI IN COMUNE
 	// FACCIO LA SOMMA E POI NORMALIZZO TUTTI
-	for (int index = 0; index < mesh->indices.size(); index = index+3)
+	for (int index = 0; index < mesh->indices.size(); index = index + 3)
 	{
-		//std::cout << "index " << index << "\n";
+		// INDICI DEI VERTICI
 		int i1 = mesh->indices.at(index);
-		int i2 = mesh->indices.at(index+1);
-		int i3 = mesh->indices.at(index+2);
+		int i2 = mesh->indices.at(index + 1);
+		int i3 = mesh->indices.at(index + 2);
 
+		// VERTICI
 		glm::vec3 v1 = mesh->vertices[i1];
 		glm::vec3 v2 = mesh->vertices[i2];
 		glm::vec3 v3 = mesh->vertices[i3];
+
 		glm::vec3 lato1 = glm::vec3(v1) - glm::vec3(v2);
 		glm::vec3 lato2 = glm::vec3(v1) - glm::vec3(v3);
 		glm::vec3 normale = glm::normalize(glm::cross(lato1, lato2));
@@ -904,11 +916,9 @@ void loadObjFile(string file_path, Mesh* mesh)
 		mesh->normals[i3] += normale;
 	}
 
-	std::cout << "rinormali\n";
 	// rinormalizzo tutti
-	for (int index = 0; index < mesh->normals.size(); index++) {
+	for (int index = 0; index < mesh->normals.size(); index++)
 		mesh->normals[index] = glm::normalize(mesh->normals[index]);
-	}
 }
 
 void drawAxis(float scale, int drawLetters)
@@ -972,9 +982,9 @@ void printToScreen()
 {
 	string axis = "Asse: ";
 	string mode = "Naviga/Modifica: ";
-	string obj = "Oggetto: " + objects.at(selectedObject).name;
+	string obj = "Oggetto: " + objects[selectedObject].name;
 	string ref = "Sistema WCS/OCS: ";
-	string mat = "Materiale: " + materials[objects.at(selectedObject).material].name;
+	string mat = "Materiale: " + materials[objects[selectedObject].material].name;
 	switch (WorkingAxis) {
 	case X: axis += "X"; break;
 	case Y: axis += "Y"; break;
@@ -986,7 +996,6 @@ void printToScreen()
 	case SCALING: mode += "Scalatura"; break;
 	case NAVIGATION: mode += "Naviga"; break;
 	}
-	
 	switch (TransformMode) {
 	case OCS: ref += "OCS"; break;
 	case WCS: ref += "WCS"; break;

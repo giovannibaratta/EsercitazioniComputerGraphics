@@ -125,7 +125,6 @@
   <ItemGroup>
     <ClCompile Include="HUD_Logger.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HUD_Logger.h" />
