@@ -65,6 +65,7 @@ public:
   }
   float getArea () const;
   Vec3f RandomPoint () const;
+  Vec3f getPoint(float s, float t);
   Vec3f computeNormal () const;
 
   // =========

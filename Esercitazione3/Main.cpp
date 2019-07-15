@@ -74,8 +74,10 @@ typedef struct {
 } Object;
 
 const string MeshDir = "Mesh/";
+/* Contiene gli oggetti caricati */
 static vector<Object> objects;
 static vector<Material> materials;
+/* Indice dell'oggetto selezionato per la trasformazione*/
 int selectedObject;
 
 // Materiali disponibili
@@ -89,25 +91,31 @@ static glm::vec4 lightpos = { 5.0f, 5.0f, 5.0f, 1.0f };
 /*camera structures*/
 constexpr float CAMERA_ZOOM_SPEED = 0.1f;
 constexpr float CAMERA_TRASLATION_SPEED = 0.01f;
+/* spostamento per il panning e lo zoom */
 constexpr float CAMERA_SHIFT = 0.5f;
+/* velocità sul camera path */
 constexpr float CAMERA_SPEED = 0.1f;
 
 float multiplier = 10.0f;
+/* curva sulla quale si muove la telecamera */
 glm::vec4 cameraPathControlPoint[8] = {
 	glm::vec4(0.0, 0.0, 1.0, 1.0) * multiplier,
 	glm::vec4(1.0, 0.0, 1.0, 1.0) * multiplier,
 	glm::vec4(0.8, 0.0, 0.0, 1.0) * multiplier,
-	glm::vec4(0.5, 0.0, -1.0, 1.0) * multiplier,
-	glm::vec4(-0.7, 0.0, -0.7, 1.0) * multiplier,
-	glm::vec4(0.5, 0.0, 0.2, 1.0) * multiplier,
+	glm::vec4(0.5, 1.0, -1.0, 1.0) * multiplier,
+	glm::vec4(-0.7, 1.5, -0.7, 1.0) * multiplier,
+	glm::vec4(0.5, 1.0, 0.2, 1.0) * multiplier,
 	glm::vec4(-1.0, 0.0, 1.0, 1.0) * multiplier,
 	glm::vec4(0.0, 0.0, 1.0, 1.0) * multiplier
 };
 
+/* se true la telecamera si muove automaticamente sul percorso definito sopra*/
 bool cameraPathEnabled = false;
-// in ms
+/* ultimo aggiornamento in ms per lo spostamento della camera */
 float lastUpdate = 0;
+/* percentuale di percorso effettuato dalla camera */
 float pathCovered = 0.0;
+float deCasteljauResult[3];
 
 struct {
 	glm::vec4 position;
@@ -180,6 +188,7 @@ void moveCameraRight();
 void moveCameraUp();
 void moveCameraDown();
 glm::mat4 vcsToWcsMatrix();
+/* tempo in ms dall'avvio dell'applicazione */
 float currentTime();
 void updateDisplay(int value);
 
@@ -200,6 +209,7 @@ void drawGrid(float scale, int dimension);
 /*Logging to screen*/
 void printToScreen();
 
+/* implementazione di de casteljau*/
 void deCasteljau(float param, float* result);
 
 int main(int argc, char** argv) {
@@ -312,14 +322,13 @@ void init() {
 	loadObjFile(MeshDir + "cow.obj", &cow);
 	generate_and_load_buffers(&cow);
 
-	Mesh hand = {};
-	loadObjFile(MeshDir + "hand.obj", &hand);
-	generate_and_load_buffers(&hand);
+	Mesh plane = {};
+	loadObjFile(MeshDir + "airplane.obj", &plane);
+	generate_and_load_buffers(&plane);
 
-	// Object Setup
+	// inizializzazione impostazioni degli oggetti caricati
 	Object object = {};
-
-
+	
 	object.mesh = sphere;
 	object.material = MaterialType::RED_PLASTIC;
 	object.name = "Sfera";
@@ -329,19 +338,19 @@ void init() {
 	objects.push_back(object);
 
 	object.mesh = cow;
-	object.material = MaterialType::RED_PLASTIC;
+	object.material = MaterialType::BRASS;
 	object.name = "Cow";
 	glLoadIdentity();
 	glTranslatef(-2.0, 0.0, -2.0);
 	glGetFloatv(GL_MODELVIEW_MATRIX, object.model_matrix);
 	objects.push_back(object);
 
-	object.mesh = hand;
-	object.material = MaterialType::RED_PLASTIC;
-	object.name = "Hand";
+	object.mesh = plane;
+	object.material = MaterialType::EMERALD;
+	object.name = "Plane";
 	glLoadIdentity();
-	glTranslatef(2.0, 0.0, 2.0);
-	glScalef(0.4, 0.4, 0.4);
+	glTranslatef(-5.0, -0.5, -5.0);
+	glRotatef(180, 1.0, 0.0, 0.0);
 	glGetFloatv(GL_MODELVIEW_MATRIX, object.model_matrix);
 
 	objects.push_back(object);
@@ -395,6 +404,7 @@ void display() {
 	drawGrid(10.0, 100); // The horizontal grid
 	glEnable(GL_LIGHTING);
 
+	/* disegno tutti gli oggetti con i relativi assi locali */
 	for (int i = 0; i < objects.size(); i++) {
 		glPushMatrix();
 		// disegno asse locale all'oggetto
@@ -419,22 +429,22 @@ void display() {
 
 	printToScreen();
 
+	/* se l'impostazione è abilitata sposta la camera lungo la curva senza modificare
+	il lookAt */
 	if (cameraPathEnabled) {
-		// sposta la telecamera lungo la curva
 		float newUpdate = currentTime();
 		pathCovered += (newUpdate - lastUpdate) * CAMERA_SPEED / 1000;
 		if (pathCovered > 1)
 			pathCovered -= static_cast<int>(pathCovered);
-		float result[3];
-		deCasteljau(pathCovered, result);
-		ViewSetup.position = glm::vec4(result[0],result[1], result[2], 1.0);
-		cout << "Path covered" << pathCovered << " new Pos  " << result[0] << " " << result[1] << " " << result[2] << endl;
+		deCasteljau(pathCovered, deCasteljauResult);
+		ViewSetup.position = glm::vec4(deCasteljauResult[0],deCasteljauResult[1], deCasteljauResult[2], 1.0);
 		lastUpdate = newUpdate;
 	}
 
 	glutSwapBuffers();
 }
 
+/* Aggiornamento più frequente dell'immagine */
 void updateDisplay(int value) {
 	display();
 	glutTimerFunc(16, updateDisplay, 0);
@@ -625,6 +635,7 @@ void main_menu_func(int option)
 {
 	switch (option)
 	{
+		/* opzioni aggintiva per abilitare il movimento automatico della camera */
 	case MenuOption::CAMERA_PATH:
 		cameraPathEnabled = !cameraPathEnabled;
 		if (cameraPathEnabled) {
@@ -654,6 +665,7 @@ void main_menu_func(int option)
 }
 void material_menu_function(int option) 
 {
+	// aggiorno il materiale dell'oggetto con quello scelto dal menu
 	objects[selectedObject].material = static_cast<MaterialType>(option);
 	glutPostRedisplay();
 }
@@ -697,6 +709,7 @@ glm::vec3 getTrackBallPoint(float x, float y)
 	return point;
 }
 
+/* calcolo della matrice per passare dalle coordinate in vcs alle coordinate in wcs */
 glm::mat4 vcsToWcsMatrix() {
 	glm::vec3 vup = ViewSetup.upVector;
 	glm::vec3 w = glm::normalize(ViewSetup.position - ViewSetup.target);

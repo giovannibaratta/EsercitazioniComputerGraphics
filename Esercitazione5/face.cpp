@@ -61,6 +61,17 @@ Face::RandomPoint () const
   return answer;
 }
 
+Vec3f
+Face::getPoint(float s, float t) {
+	Vec3f a = (*this)[0]->get();
+	Vec3f b = (*this)[1]->get();
+	Vec3f c = (*this)[2]->get();
+	Vec3f d = (*this)[3]->get();
+
+	Vec3f answer = s * t * a + s * (1 - t) * b + (1 - s) * t * c + (1 - s) * (1 - t) * d;
+	return answer;
+}
+
 // =========================================================================
 // the intersection routines
 

@@ -59,7 +59,7 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 {
 	// false per hard shadow
 	// true per soft shadow 
-	bool softShadow = false;
+	bool softShadow = true;
 	// numero di raggi per luci ad area
 	const int NUM_RAY_TO_LIGHT = 64;
 
@@ -149,26 +149,31 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 					SOFT SHADOWN
 				=======================================*/
 				Face *f = mesh->getLights ()[i];
-				for (int j = 0; j < NUM_RAY_TO_LIGHT; j++) {
-					Vec3f pointOnLight = f->RandomPoint();
-					Vec3f dirToLight = pointOnLight - point;
-					dirToLight.Normalize();
-					// creare shadow ray verso il punto luce, dal punto colpito
-					Ray* shadowRay = new Ray(point, dirToLight);
-					// controllare il primo oggetto colpito da tale raggio e verificare se è una luce
-					Hit* hitShadow = new Hit();
-					bool colpito = CastRay(*shadowRay, *hitShadow, false);
-					if (colpito) {
-						Vec3f puntoColpito = shadowRay->pointAtParameter(hitShadow->getT());
-						// distanza dal punto colpito al punto della luce
-						float dist = (puntoColpito - pointOnLight).Length();
-						// se ho colpito la luce la distanza deve essere 0
-						if (dist < 0.01)
-							if (normal.Dot3(dirToLight) > 0)
-							{
-								Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * (f->getArea() / NUM_RAY_TO_LIGHT);
-								answer += m->Shade(ray, hit, dirToLight, lightColor, args);
-							}
+
+				int rowColumn = sqrt(NUM_RAY_TO_LIGHT);
+
+				for (int rowIndex = 0; rowIndex < rowColumn; rowIndex++) {
+					for (int columnIndex = 0; columnIndex < rowColumn; columnIndex++) {
+						Vec3f pointOnLight = f->getPoint(static_cast<float>(rowIndex) / rowColumn, static_cast<float>(columnIndex) / rowColumn);
+						Vec3f dirToLight = pointOnLight - point;
+						dirToLight.Normalize();
+						// creare shadow ray verso il punto luce, dal punto colpito
+						Ray* shadowRay = new Ray(point, dirToLight);
+						// controllare il primo oggetto colpito da tale raggio e verificare se è una luce
+						Hit* hitShadow = new Hit();
+						bool colpito = CastRay(*shadowRay, *hitShadow, false);
+						if (colpito) {
+							Vec3f puntoColpito = shadowRay->pointAtParameter(hitShadow->getT());
+							// distanza dal punto colpito al punto della luce
+							float dist = (puntoColpito - pointOnLight).Length();
+							// se ho colpito la luce la distanza deve essere 0
+							if (dist < 0.01)
+								if (normal.Dot3(dirToLight) > 0)
+								{
+									Vec3f lightColor = 0.2 * f->getMaterial()->getEmittedColor() * (f->getArea() / (rowColumn * rowColumn));
+									answer += m->Shade(ray, hit, dirToLight, lightColor, args);
+								}
+						}
 					}
 				}
 			}
