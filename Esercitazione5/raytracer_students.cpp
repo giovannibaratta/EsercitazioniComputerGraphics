@@ -67,16 +67,15 @@ RayTracer::TraceRay (Ray & ray, Hit & hit, int bounce_count) const
 	bool intersect = CastRay (ray, hit, false);
 
 	if( bounce_count == args->num_bounces )
-	RayTree::SetMainSegment (ray, 0, hit.getT () );
+		RayTree::SetMainSegment (ray, 0, hit.getT () );
 	else
-	RayTree::AddReflectedSegment(ray, 0, hit.getT() );
+		RayTree::AddReflectedSegment(ray, 0, hit.getT() );
 
 	Vec3f answer = args->background_color;
 
 	Material *m = hit.getMaterial ();
 	if (intersect == true)
 	{
-
 		assert (m != NULL);
 		Vec3f normal = hit.getNormal ();
 		// punto dell'oggetto colpito
